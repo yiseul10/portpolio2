@@ -1,8 +1,14 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { formatDate, getBlogPosts } from 'app/blog/utils'
 
-export function BlogPosts() {
-  let allBlogs = getBlogPosts()
+export async function BlogPosts() {
+  const allBlogs = await getBlogPosts()
+
+  if (!Array.isArray(allBlogs)) {
+    return <div>블로그 글을 불러올 수 없습니다.</div>
+  }
 
   return (
     <div>

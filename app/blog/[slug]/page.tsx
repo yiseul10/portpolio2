@@ -1,29 +1,40 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
+import { formatDate } from 'app/blog/utils'
 import { baseUrl } from 'app/sitemap'
+import { supabase } from "@lib/superbase";
+import type { Metadata } from 'next'
 
 export async function generateStaticParams() {
-  let posts = getBlogPosts()
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('slug')
+    .eq('published', true)
 
-  return posts.map((post) => ({
+  return posts?.map((post) => ({
     slug: post.slug,
-  }))
+  })) ?? []
 }
 
-export function generateMetadata({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
-  if (!post) {
-    return
-  }
+export async function generateMetadata({ params }): Promise<Metadata | undefined> {
+  const { data: post } = await supabase
+    .from('posts')
+    .select('title, description, image, created_at, slug')
+    .eq('slug', params.slug)
+    .eq('published', true)
+    .single()
 
-  let {
+  if (!post) return undefined
+
+  const {
     title,
-    publishedAt: publishedTime,
-    summary: description,
+    description,
     image,
-  } = post.metadata
-  let ogImage = image
+    created_at: publishedTime,
+    slug,
+  } = post
+
+  const ogImage = image
     ? image
     : `${baseUrl}/og?title=${encodeURIComponent(title)}`
 
@@ -35,12 +46,8 @@ export function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
-      url: `${baseUrl}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      url: `${baseUrl}/blog/${slug}`,
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -51,8 +58,13 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Blog({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
+export default async function Blog({ params }) {
+  const { data: post } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', params.slug)
+    .eq('published', true)
+    .single()
 
   if (!post) {
     notFound()
@@ -67,13 +79,13 @@ export default function Blog({ params }) {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'BlogPosting',
-            headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${baseUrl}${post.metadata.image}`
-              : `/og?title=${encodeURIComponent(post.metadata.title)}`,
+            headline: post.title,
+            datePublished: post.created_at,
+            dateModified: post.created_at,
+            description: post.description,
+            image: post.image
+              ? `${baseUrl}${post.image}`
+              : `/og?title=${encodeURIComponent(post.title)}`,
             url: `${baseUrl}/blog/${post.slug}`,
             author: {
               '@type': 'Person',
@@ -83,15 +95,15 @@ export default function Blog({ params }) {
         }}
       />
       <h1 className="title font-semibold text-2xl tracking-tighter">
-        {post.metadata.title}
+        {post.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          {formatDate(post.metadata.publishedAt)}
+          {formatDate(post.created_at)}
         </p>
       </div>
       <article className="prose">
-        <CustomMDX source={post.content} />
+        <CustomMDX source={post.mdx_content} />
       </article>
     </section>
   )

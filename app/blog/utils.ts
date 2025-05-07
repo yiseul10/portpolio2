@@ -1,5 +1,7 @@
 import fs from 'fs'
 import path from 'path'
+import {supabase} from "@lib/superbase";
+
 
 type Metadata = {
   title: string
@@ -49,8 +51,34 @@ function getMDXData(dir) {
   })
 }
 
-export function getBlogPosts() {
+export function getBlogPages() {
   return getMDXData(path.join(process.cwd(), 'app', 'blog', 'posts'))
+}
+
+export async function getBlogPosts(): Promise<
+    { metadata: Metadata; slug: string; content: string }[]
+> {
+  const { data, error } = await supabase
+      .from('posts')
+      .select('title, created_at, description, image, slug, mdx_content')
+      .is('published', true)
+      .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('❌ Supabase error:', error.message)
+    return []
+  }
+console.log(data)
+  return data.map((post) => ({
+    metadata: {
+      title: post.title,
+      publishedAt: post.created_at,
+      summary: post.description,
+      image: post.image,
+    },
+    slug: post.slug,
+    content: post.mdx_content,
+  }))
 }
 
 export function formatDate(date: string, includeRelative = false) {

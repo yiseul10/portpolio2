@@ -2,13 +2,10 @@ import Link from 'next/link'
 
 const navItems = {
   '/': {
-    name: 'home',
+    name: 'Home',
   },
   '/blog': {
-    name: 'blog',
-  },
-  'https://vercel.com/templates/next.js/portfolio-starter-kit': {
-    name: 'deploy',
+    name: 'Blog',
   },
 }
 
@@ -28,7 +25,7 @@ export function Navbar() {
                   href={path}
                   className="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
                 >
-                  {name}
+                 <span className="text-sm font-medium text-neutral-800">{name.toLocaleUpperCase()}</span>
                 </Link>
               )
             })}
