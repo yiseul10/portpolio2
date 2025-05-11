@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
-import { formatDate } from 'app/blog/utils'
 import { baseUrl } from 'app/sitemap'
 import { supabase } from "@lib/superbase";
 import type { Metadata } from 'next'
+import {formatDate} from "@/app/blog/utils/post.server";
 
 export async function generateStaticParams() {
   const { data: posts } = await supabase

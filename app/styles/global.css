@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-
+@import '../../node_modules/tailwindcss/dist/lib.d.mts';
+/* MDX 기반 스타일링 */
 ::selection {
   background-color: #47a3f3;
   color: #fefefe;

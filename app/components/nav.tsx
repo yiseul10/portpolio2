@@ -1,4 +1,10 @@
+'use client'
 import Link from 'next/link'
+import {Button} from "@/components/ui/button";
+import { useEffect, useState } from 'react'
+
+import type { Session } from '@supabase/supabase-js'
+import {supabase} from "@lib/superbase";
 
 const navItems = {
   '/': {
@@ -10,11 +16,27 @@ const navItems = {
 }
 
 export function Navbar() {
+  const [session, setSession] = useState<Session | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => {
+      authListener?.subscription.unsubscribe()
+    }
+  }, [])
+
   return (
     <aside className="-ml-[8px] mb-16 tracking-tight">
       <div className="lg:sticky lg:top-20">
         <nav
-          className="flex flex-row items-start relative px-0 pb-0 fade md:overflow-auto scroll-pr-6 md:relative"
+          className="flex flex-row justify-between relative px-0 pb-0 fade md:overflow-auto scroll-pr-6 md:relative"
           id="nav"
         >
           <div className="flex flex-row space-x-0 pr-10">
@@ -29,6 +51,17 @@ export function Navbar() {
                 </Link>
               )
             })}
+          </div>
+          <div className="flex justify-end">
+            {session ? (
+              <Button variant="link" onClick={() => supabase.auth.signOut()}>
+                Logout
+              </Button>
+            ) : (
+              <Button variant="link">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </div>
         </nav>
       </div>
