@@ -4,6 +4,7 @@ import { baseUrl } from 'app/sitemap'
 import { supabase } from "@lib/superbase";
 import type { Metadata } from 'next'
 import {formatDate} from "@/app/blog/utils/post.server";
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   const { data: posts } = await supabase
@@ -11,9 +12,10 @@ export async function generateStaticParams() {
     .select('slug')
     .eq('published', true)
 
-  return posts?.map((post) => ({
-    slug: post.slug,
-  })) ?? []
+  return posts?.filter(post => post.slug !== 'supplier_system')
+      .map((post) => ({
+        slug: post.slug,
+      })) ?? []
 }
 
 export async function generateMetadata({ params }): Promise<Metadata | undefined> {
@@ -69,7 +71,6 @@ export default async function Blog({ params }) {
   if (!post) {
     notFound()
   }
-console.log('post', post);
 
   return (
     <section>
