@@ -8,7 +8,6 @@ import Link from "next/link";
 
 export default function Page() {
  const { session, loading } = useAuthSession();
-
   return (
       <div className="flex w-full flex-col">
         <div className="flex items-center justify-between h-[80px] w-full">
