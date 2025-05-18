@@ -30,6 +30,8 @@ export default function Page() {
   const [errorMsg, setErrorMsg] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+
   const schema = z.object({
     title: z.string().min(1, "required"),
     mdx_content: z.string(),
@@ -90,7 +92,7 @@ export default function Page() {
     } else {
       setErrorMsg("")
       setSuccessMsg("글이 성공적으로 업로드되었습니다.")
-      router.push(`/posts/${values.slug}`)
+        router.push(`${baseUrl}/blog/${values.slug}`)
     }
   }
 

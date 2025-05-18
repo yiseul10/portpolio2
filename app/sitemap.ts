@@ -1,6 +1,6 @@
 import { getBlogPages } from '@/app/blog/utils/mdx.server'
 
-export const baseUrl = 'https://portfolio-blog-starter.vercel.app'
+export const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
 
 export default async function sitemap() {
   let blogs = getBlogPages().map((post) => ({

@@ -18,6 +18,7 @@ export function BlogPosts() {
     return <div>블로그 글을 불러올 수 없습니다.</div>
   }
 
+  console.log(allBlogs)
   return (
     <>
       {allBlogs
