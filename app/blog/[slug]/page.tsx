@@ -69,6 +69,7 @@ export default async function Blog({ params }) {
   if (!post) {
     notFound()
   }
+console.log('post', post);
 
   return (
     <section>

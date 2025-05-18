@@ -121,3 +121,137 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* === MDX Prose Styles === */
+.prose .anchor {
+  @apply absolute invisible no-underline;
+  margin-left: -1em;
+  padding-right: 0.5em;
+  width: 80%;
+  max-width: 700px;
+  cursor: pointer;
+}
+
+.anchor:hover {
+  @apply visible;
+}
+
+.prose a {
+  @apply underline transition-all decoration-neutral-400 dark:decoration-neutral-600 underline-offset-2 decoration-[0.1em];
+}
+
+.prose .anchor:after {
+  @apply text-neutral-300 dark:text-neutral-700;
+  content: '#';
+}
+
+.prose *:hover > .anchor {
+  @apply visible;
+}
+
+.prose pre {
+  @apply bg-neutral-50 dark:bg-neutral-900 rounded-lg overflow-x-auto border border-neutral-200 dark:border-neutral-900 py-2 px-3 text-sm;
+}
+
+.prose code {
+  @apply px-1 py-2 rounded-lg;
+}
+
+.prose pre code {
+  @apply p-0;
+  border: initial;
+  line-height: 1.5;
+}
+
+.prose code span {
+  @apply font-medium;
+}
+
+.prose img {
+  /* Don't apply styles to next/image */
+  @apply m-0;
+}
+
+.prose p {
+  @apply my-4 text-neutral-800 dark:text-neutral-200;
+}
+
+.prose h1 {
+  @apply text-4xl font-medium tracking-tight mt-6 mb-2;
+}
+
+.prose h2 {
+  @apply text-xl font-medium tracking-tight mt-6 mb-2;
+}
+
+.prose h3 {
+  @apply text-xl font-medium tracking-tight mt-6 mb-2;
+}
+
+.prose h4 {
+  @apply text-lg font-medium tracking-tight mt-6 mb-2;
+}
+
+.prose strong {
+  @apply font-medium;
+}
+
+.prose ul {
+  @apply list-disc pl-6;
+}
+
+.prose ol {
+  @apply list-decimal pl-6;
+}
+
+.prose li {
+    @apply pl-2 leading-relaxed;
+}
+
+.prose > :first-child {
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+pre {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.prose table {
+    @apply table-auto border-collapse w-full text-left text-sm;
+}
+
+.prose thead {
+    @apply bg-neutral-100 dark:bg-neutral-800;
+}
+
+.prose th, .prose td {
+    @apply border border-neutral-300 dark:border-neutral-700 px-4 py-2;
+}
+
+.prose code {
+  @apply bg-neutral-100 dark:bg-neutral-800 text-pink-600 font-mono text-xs px-1 py-0.5 rounded;
+}
+
+.prose blockquote {
+    @apply bg-emerald-50 px-4 py-1 text-sm rounded-lg;
+}
+
+.prose hr {
+    @apply py-4
+}
+
+.prose .anchor {
+    display: none !important;
+}
+
+.prose pre code {
+  @apply bg-transparent text-neutral-800 dark:text-neutral-100 p-0;
+  border: initial;
+  line-height: 1.5;
+}
