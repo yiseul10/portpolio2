@@ -47,7 +47,7 @@ export function Navbar() {
                   href={path}
                   className="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
                 >
-                 <span className="text-sm font-medium text-neutral-800">{name.toLocaleUpperCase()}</span>
+                 <span className="text-xs font-bold text-neutral-800">{name.toLocaleUpperCase()}</span>
                 </Link>
               )
             })}
@@ -55,11 +55,13 @@ export function Navbar() {
           <div className="flex justify-end">
             {session ? (
               <Button variant="link" onClick={() => supabase.auth.signOut()}>
-                Logout
+                <span className="text-xs">Logout</span>
               </Button>
             ) : (
               <Button variant="link">
-                <Link href="/login">Login</Link>
+                <Link href="/login">
+                  <div className="text-xs">Login</div>
+                </Link>
               </Button>
             )}
           </div>

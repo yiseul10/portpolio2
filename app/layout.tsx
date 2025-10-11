@@ -6,6 +6,7 @@ import { Navbar } from './components/nav'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import Footer from './components/footer'
+import { Toaster } from "sonner";
 
  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: {
     default: 'My blog',
-    template: '%s | My blog',
+    template: '%s | blog',
   },
   description: 'This is my portfolio.',
   openGraph: {
@@ -53,15 +54,16 @@ export default function RootLayout({
         GeistMono.variable
       )}
     >
-      <body className="antialiased max-w-xl mx-4 mt-8 lg:mx-auto">
-        <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
-          <Navbar />
-          {children}
-          <Footer />
-          <Analytics />
-          <SpeedInsights />
-        </main>
-      </body>
+    <body className="antialiased max-w-xl mx-4 mt-0 lg:mx-auto min-h-screen flex flex-col">
+    <main className=" min-w-0 mt-2 flex flex-col px-2 md:px-0 flex-1">
+      <Navbar />
+      {children}
+      <Toaster />
+    </main>
+    <Footer />
+    <Analytics />
+    <SpeedInsights />
+    </body>
     </html>
   )
 }
