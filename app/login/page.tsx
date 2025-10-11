@@ -4,6 +4,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {supabase} from "@lib/superbase";
+import { BadgeInfo } from "lucide-react";
 
 export default function Page() {
   const [email, setEmail] = useState("");
@@ -31,9 +32,13 @@ export default function Page() {
     <div className="w-full mx-auto max-w-xl p-6">
       <Card className="text-center p-6">
         <CardHeader>
-          <CardTitle>ME LOGIN</CardTitle>
+          <CardTitle>LOGIN</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-1 items-center mb-1">
+            <BadgeInfo className="w-4 h-4 text-emerald-400"/>
+            <span className="text-xs font-bold text-emerald-400">인증된 사용자만 가능합니다.</span>
+          </div>
           <div className="flex items-center gap-3">
             <Input
               type="email"

@@ -8,7 +8,7 @@ const nextConfig = {
         fallback: true, // 또는 'blocking'
     },
     images: {
-        domains: ['https://yotocrfidehgijxpimcp.supabase.co'],
+        domains: ['lzluqxxakgdshhqiomcy.supabase.co'],
     },
 }
 
