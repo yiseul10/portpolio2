@@ -15,9 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@lib/superbase"
-import MdEditor from 'react-markdown-editor-lite'
-import MarkdownIt from 'markdown-it'
-import 'react-markdown-editor-lite/lib/index.css'
+import { TiptapEditor } from "@/components/tiptap-editor"
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertTriangle, Loader2, MoveLeft, Check } from "lucide-react"
@@ -30,8 +28,6 @@ export default function EditPostPage() {
     const router = useRouter()
     const params = useParams()
     const slug = params.slug as string
-    const mdParser = new MarkdownIt()
-
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [existingImage, setExistingImage] = useState<string>("")
     const [errorMsg, setErrorMsg] = useState("")
@@ -39,7 +35,6 @@ export default function EditPostPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [session, setSession] = useState<Session | null>(null)
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
 
     const schema = z.object({
         title: z.string().min(1, "required"),
@@ -171,7 +166,7 @@ export default function EditPostPage() {
             await revalidatePost(values.slug)
 
             setTimeout(() => {
-                router.push(`${baseUrl}/blog/${values.slug}`)
+                router.push(`/blog/${values.slug}`)
                 router.refresh()
             }, 1000)
         }
@@ -198,7 +193,7 @@ export default function EditPostPage() {
     }
 
     return (
-        <div className="w-full mx-auto max-w-xl">
+        <div className="editor-page w-full mx-auto">
             <Card className="text-center p-6">
                 <CardHeader>
                     <CardTitle>Edit Post</CardTitle>
@@ -255,11 +250,9 @@ export default function EditPostPage() {
                                     <FormItem>
                                         <FormLabel>content</FormLabel>
                                         <FormControl>
-                                            <MdEditor
+                                            <TiptapEditor
                                                 value={field.value}
-                                                style={{ height: '400px' }}
-                                                renderHTML={(text) => mdParser.render(text)}
-                                                onChange={({ text }) => field.onChange(text)}
+                                                onChange={field.onChange}
                                             />
                                         </FormControl>
                                     </FormItem>

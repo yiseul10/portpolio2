@@ -13,9 +13,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {supabase} from "@lib/superbase";
-import MdEditor from 'react-markdown-editor-lite'
-import MarkdownIt from 'markdown-it'
-import 'react-markdown-editor-lite/lib/index.css'
+import {TiptapEditor} from "@/components/tiptap-editor";
 import {Switch} from "@/components/ui/switch";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -24,13 +22,11 @@ import { useRouter } from "next/navigation"
 
 export default function Page() {
   const router = useRouter()
-  const mdParser = new MarkdownIt()
   const [imageFile, setImageFile] = useState<File | null>(null)
 
   const [errorMsg, setErrorMsg] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
 
   const schema = z.object({
     title: z.string().min(1, "required"),
@@ -92,12 +88,12 @@ export default function Page() {
     } else {
       setErrorMsg("")
       setSuccessMsg("글이 성공적으로 업로드되었습니다.")
-        router.push(`${baseUrl}/blog/${values.slug}`)
+        router.push(`/blog/${values.slug}`)
     }
   }
 
   return (
-    <div className="w-full mx-auto max-w-xl p-6">
+    <div className="editor-page w-full mx-auto p-6">
       <Card className="text-center p-6">
         <CardHeader>
           <CardTitle>Add Post</CardTitle>
@@ -153,12 +149,9 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>content</FormLabel>
                     <FormControl>
-                      <MdEditor
+                      <TiptapEditor
                         value={field.value}
-                        style={{ height: '400px' }}
-                        renderHTML={(text) => mdParser.render(text)}
-                        onChange={({ text }) => field.onChange(text)}
-                        // onImageUpload={handleImageUpload}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                   </FormItem>

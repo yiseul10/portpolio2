@@ -19,7 +19,7 @@ export default function Page() {
             }
         </div>
         <section>
-          <BlogPosts  />
+          <BlogPosts showFilter showPagination />
         </section>
       </div>
   )

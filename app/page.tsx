@@ -16,7 +16,7 @@ export default function Page() {
       </span>
         </div>
       <div className="mt-4 mb-10">
-        <BlogPosts />
+        <BlogPosts limit={3} showMoreLink />
       </div>
     </section>
   )
