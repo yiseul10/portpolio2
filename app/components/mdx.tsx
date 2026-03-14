@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { MDXRemote } from 'next-mdx-remote/rsc'
+import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
@@ -27,47 +28,20 @@ function Table({ data }) {
   )
 }
 
-function CustomLink(props) {
-  let href = props.href
-
-  if (href.startsWith('/')) {
-    return (
-      <Link href={href} {...props}>
-        {props.children}
-      </Link>
-    )
-  }
-
-  if (href.startsWith('#')) {
-    return <a {...props} />
-  }
-
-  return <a target="_blank" rel="noopener noreferrer" {...props} />
-}
-
-function RoundedImage(props) {
-  return <Image alt={props.alt} className="rounded-lg" {...props} />
-}
-
-function Code({ children, ...props }) {
-  let codeHTML = highlight(children)
-  return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
-}
-
 function slugify(str) {
   return str
     .toString()
     .toLowerCase()
-    .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except for -
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/&/g, '-and-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
 }
 
 function createHeading(level) {
   const Heading = ({ children }) => {
-    let slug = slugify(children)
+    let slug = slugify(String(children))
     return React.createElement(
       `h${level}`,
       { id: slug },
@@ -81,35 +55,42 @@ function createHeading(level) {
       children
     )
   }
-
   Heading.displayName = `Heading${level}`
-
   return Heading
 }
 
-let components = {
+const components = {
   h1: createHeading(1),
   h2: createHeading(2),
   h3: createHeading(3),
   h4: createHeading(4),
   h5: createHeading(5),
   h6: createHeading(6),
-  Image: RoundedImage,
-  a: CustomLink,
-  code: Code,
-  Table,
+  img: (props) => <Image alt={props.alt || ''} className="rounded-lg" width={800} height={450} {...props} />,
+  a: ({ href, children, ...props }) => {
+    if (!href) return <a {...props}>{children}</a>
+    if (href.startsWith('/')) return <Link href={href} {...props}>{children}</Link>
+    if (href.startsWith('#')) return <a href={href} {...props}>{children}</a>
+    return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>
+  },
+  code: ({ children, className, ...props }) => {
+    const isInline = !className
+    if (isInline) {
+      return <code {...props}>{children}</code>
+    }
+    const codeHTML = highlight(String(children))
+    return <code className={className} dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
+  },
 }
 
-export function CustomMDX(props) {
+export function CustomMDX({ source, components: extraComponents }: { source: string, components?: Record<string, any> }) {
   return (
-    <MDXRemote
-      {...props}
-      options={{
-        mdxOptions: {
-          remarkPlugins: [remarkGfm],
-        },
-      }}
-      components={{ ...components, ...(props.components || {}) }}
-    />
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw]}
+      components={{ ...components, ...(extraComponents || {}) } as any}
+    >
+      {source}
+    </ReactMarkdown>
   )
 }
