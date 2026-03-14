@@ -447,7 +447,7 @@ export const TiptapEditor = React.forwardRef<HTMLDivElement, TiptapEditorProps>(
       ],
       content: value,
       onUpdate: ({ editor }) => {
-        const md = editor.storage.markdown.getMarkdown()
+        const md = (editor.storage as any).markdown.getMarkdown()
         onChange(md)
       },
       editorProps: {
@@ -482,7 +482,7 @@ export const TiptapEditor = React.forwardRef<HTMLDivElement, TiptapEditorProps>(
 
     useEffect(() => {
       if (editor && value && !editor.isFocused) {
-        const currentMd = editor.storage.markdown.getMarkdown()
+        const currentMd = (editor.storage as any).markdown.getMarkdown()
         if (value !== currentMd) {
           editor.commands.setContent(value)
         }
