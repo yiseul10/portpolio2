@@ -359,3 +359,82 @@ pre {
   outline: 2px solid var(--ring);
   border-radius: 0.5rem;
 }
+
+/* === Resume Print Styles === */
+@media print {
+  /* 페이지 설정 */
+  @page {
+    size: A4;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+
+  /* 전체 레이아웃 리셋 */
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* nav, footer, 버튼 숨김 */
+  aside, footer {
+    display: none !important;
+  }
+
+  /* 이력서 콘텐츠 인쇄 최적화 */
+  .resume-content {
+    max-width: 100% !important;
+  }
+
+  .resume-content h1 {
+    font-size: 22px !important;
+  }
+
+  .resume-content h2 {
+    font-size: 14px !important;
+    page-break-after: avoid;
+  }
+
+  .resume-content h3 {
+    page-break-after: avoid;
+  }
+
+  .resume-content section {
+    page-break-inside: avoid;
+  }
+
+  /* 링크를 텍스트로 표시 */
+  .resume-content a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  .resume-content a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 10px;
+    color: #666;
+  }
+
+  /* 다크모드 색상 무시 */
+  .resume-content * {
+    color: black !important;
+    border-color: #ddd !important;
+  }
+
+  .resume-content .text-neutral-500,
+  .resume-content .text-neutral-600 {
+    color: #555 !important;
+  }
+}
