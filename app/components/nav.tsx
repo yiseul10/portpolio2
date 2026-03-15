@@ -9,12 +9,15 @@ import {supabase} from "@lib/superbase";
 const navItems = {
   '/': {
     name: 'Home',
+    authOnly: false,
   },
   '/blog': {
     name: 'Blog',
+    authOnly: false,
   },
   '/resume': {
     name: 'Resume',
+    authOnly: true,
   },
 }
 
@@ -43,7 +46,8 @@ export function Navbar() {
           id="nav"
         >
           <div className="flex flex-row space-x-0 pr-10">
-            {Object.entries(navItems).map(([path, { name }]) => {
+            {Object.entries(navItems).map(([path, { name, authOnly }]) => {
+              if (authOnly && !session) return null
               return (
                 <Link
                   key={path}
