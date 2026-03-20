@@ -149,8 +149,40 @@
   @apply visible;
 }
 
+.prose .code-block-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.prose .code-block-lang {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  color: #9ca3af;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  z-index: 1;
+}
+
+.dark .prose .code-block-lang {
+  background: rgba(255, 255, 255, 0.08);
+  color: #6b7280;
+}
+
 .prose pre {
-  @apply bg-neutral-50 dark:bg-neutral-900 rounded-lg overflow-x-auto border border-neutral-200 dark:border-neutral-900 py-2 px-3 text-sm;
+  @apply rounded-lg overflow-x-auto text-sm;
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  padding: 1.25rem 1rem;
+  line-height: 1.7;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 .prose code {
@@ -160,7 +192,10 @@
 .prose pre code {
   @apply p-0;
   border: initial;
-  line-height: 1.5;
+  line-height: 1.7;
+  color: #cdd6f4;
+  background: transparent;
+  font-size: 0.85rem;
 }
 
 .prose code span {
@@ -234,12 +269,30 @@ pre {
     @apply border border-neutral-300 dark:border-neutral-700 px-4 py-2;
 }
 
-.prose code {
-  @apply bg-neutral-100 dark:bg-neutral-800 text-pink-600 font-mono text-xs px-1 py-0.5 rounded;
+.prose .inline-code,
+.prose code:not(pre code) {
+  @apply font-mono text-xs px-1.5 py-0.5 rounded-md;
+  background: #f1f5f9;
+  color: #e11d48;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .prose .inline-code,
+.dark .prose code:not(pre code) {
+  background: #1e293b;
+  color: #fb7185;
+  border-color: #334155;
 }
 
 .prose blockquote {
-    @apply bg-emerald-50 px-4 py-1 text-sm rounded-lg;
+    @apply px-4 py-1 text-sm rounded-lg;
+    background: #f0fdf4;
+    border-left: 3px solid #86efac;
+}
+
+.dark .prose blockquote {
+    background: #052e16;
+    border-left-color: #166534;
 }
 
 .prose hr {
@@ -251,9 +304,11 @@ pre {
 }
 
 .prose pre code {
-  @apply bg-transparent text-neutral-800 dark:text-neutral-100 p-0;
-  border: initial;
-  line-height: 1.5;
+  @apply p-0;
+  background: transparent !important;
+  border: none !important;
+  color: #cdd6f4;
+  line-height: 1.7;
 }
 
 /* === Tiptap Editor Styles === */

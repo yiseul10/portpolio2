@@ -14,12 +14,15 @@ export const profileSchema = z.object({
 
 export const descriptionItemSchema = z.object({
   text: z.string().default(''),
-  level: z.number().min(0).max(2).default(0), // 0: 일반(bullet 없음), 1: • 메인, 2: ◦ 서브
+  level: z.number().min(0).max(5).default(0), // 0: 1단계 일반, 1: 1단계 불렛, 2: 2단계 일반, 3: 2단계 불렛, 4: 3단계 일반, 5: 3단계 불렛
+  bold: z.boolean().default(false),
+  italic: z.boolean().default(false),
 })
 
 export const experienceItemSchema = z.object({
   company: z.string().min(1, '회사명을 입력하세요'),
   role: z.string().default(''),
+  subtitle: z.string().default(''), // role 하단 한줄 설명
   startDate: z.string().default(''),
   endDate: z.string().default('현재'),
   descriptions: z.array(descriptionItemSchema).default([]),
@@ -46,12 +49,14 @@ export const certificationItemSchema = z.object({
 // 커스텀 섹션
 export const customSectionItemSchema = z.object({
   text: z.string().default(''),
+  subtitle: z.string().default(''), // layout=detailed 일 때 서브타이틀
   startDate: z.string().default(''),
   endDate: z.string().default(''),
 })
 
 export const customSectionSchema = z.object({
   title: z.string().default(''),
+  layout: z.enum(['simple', 'detailed']).default('simple'), // simple: 한줄+날짜, detailed: 타이틀+서브타이틀+날짜
   items: z.array(customSectionItemSchema).default([]),
 })
 
