@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useForm, FormProvider, useFieldArray, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -26,7 +26,24 @@ import {
   ChevronDown,
   ImagePlus,
   X,
+  GripVertical,
 } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@lib/superbase'
 import { toast } from 'sonner'
@@ -39,21 +56,138 @@ import {
 import type { Session } from '@supabase/supabase-js'
 
 // ─── Descriptions List ──────────────────────────────────
+// 3단계 × 불렛 on/off = 6 상태
 const LEVEL_CONFIG = [
-  { symbol: '', indent: 0, label: '일반', next: 1 },
-  { symbol: '•', indent: 0, label: '메인 (•)', next: 2 },
-  { symbol: '◦', indent: 24, label: '서브 (◦)', next: 0 },
+  { symbol: '',  indent: 0,  label: '1단계',       bullet: false, next: 1 },
+  { symbol: '•', indent: 0,  label: '1단계 (•)',   bullet: true,  next: 2 },
+  { symbol: '',  indent: 20, label: '2단계',       bullet: false, next: 3 },
+  { symbol: '◦', indent: 20, label: '2단계 (◦)',   bullet: true,  next: 4 },
+  { symbol: '',  indent: 40, label: '3단계',       bullet: false, next: 5 },
+  { symbol: '‣', indent: 40, label: '3단계 (‣)',   bullet: true,  next: 0 },
 ]
+
+// ─── Sortable Description Item ──────────────────────────
+function SortableDescriptionItem({
+  id,
+  index,
+  desc,
+  onUpdateText,
+  onCycleLevel,
+  onToggleBold,
+  onToggleItalic,
+  onRemove,
+  onInsertBelow,
+}: {
+  id: string
+  index: number
+  desc: any
+  onUpdateText: (i: number, value: string) => void
+  onCycleLevel: (i: number) => void
+  onToggleBold: (i: number) => void
+  onToggleItalic: (i: number) => void
+  onRemove: (i: number) => void
+  onInsertBelow: (i: number) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const level = desc.level ?? 0
+  const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[0]
+  const depthLabel = Math.floor(level / 2) + 1
+
+  return (
+    <div ref={setNodeRef} style={{ ...style, paddingLeft: config.indent }} className="flex items-start gap-1.5">
+      <button
+        type="button"
+        className="mt-2.5 text-neutral-300 hover:text-neutral-500 cursor-grab active:cursor-grabbing shrink-0 touch-none"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className="w-5 text-center text-neutral-400 text-sm shrink-0 hover:text-neutral-700 cursor-pointer mt-2.5"
+        title={`클릭하여 변경 (현재: ${config.label})`}
+        onClick={() => onCycleLevel(index)}
+      >
+        {config.symbol || `${depthLabel}`}
+      </button>
+      <Textarea
+        className={`flex-1 min-h-[36px] resize-none ${desc.bold ? 'font-bold' : ''} ${desc.italic ? 'italic' : ''}`}
+        rows={2}
+        placeholder="업무 내용을 입력하세요"
+        value={desc.text || ''}
+        onChange={(e) => onUpdateText(index, e.target.value)}
+      />
+      <div className="flex flex-col gap-0.5 mt-1">
+        <button
+          type="button"
+          className={`h-6 w-6 flex items-center justify-center text-xs font-bold rounded cursor-pointer transition-colors ${desc.bold ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+          title="굵게"
+          onClick={() => onToggleBold(index)}
+        >
+          B
+        </button>
+        <button
+          type="button"
+          className={`h-6 w-6 flex items-center justify-center text-xs italic rounded cursor-pointer transition-colors ${desc.italic ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900' : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+          title="기울임"
+          onClick={() => onToggleItalic(index)}
+        >
+          I
+        </button>
+      </div>
+      <div className="flex flex-col gap-0.5 mt-1">
+        <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" title="아래에 항목 추가" onClick={() => onInsertBelow(index)}>
+          <Plus className="h-3 w-3 text-neutral-400" />
+        </Button>
+        <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => onRemove(index)}>
+          <Trash2 className="h-3 w-3 text-red-500" />
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 function DescriptionsList({ expIndex }: { expIndex: number }) {
   const { setValue, watch } = useFormContext<ResumeData>()
   const descriptions = watch(`experience.${expIndex}.descriptions`) || []
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  // 각 항목에 stable ID 부여
+  const itemIds = useMemo(
+    () => descriptions.map((_: any, i: number) => `desc-${expIndex}-${i}`),
+    [descriptions.length, expIndex]
+  )
+
   const addItem = () => {
     setValue(`experience.${expIndex}.descriptions`, [
       ...descriptions,
-      { text: '', level: 1 },
+      { text: '', level: 1, bold: false, italic: false },
     ])
+  }
+
+  const insertBelow = (i: number) => {
+    const updated = [...descriptions]
+    updated.splice(i + 1, 0, { text: '', level: descriptions[i]?.level ?? 1, bold: false, italic: false })
+    setValue(`experience.${expIndex}.descriptions`, updated)
   }
 
   const removeItem = (i: number) => {
@@ -77,6 +211,32 @@ function DescriptionsList({ expIndex }: { expIndex: number }) {
     setValue(`experience.${expIndex}.descriptions`, updated)
   }
 
+  const toggleBold = (i: number) => {
+    const updated = [...descriptions]
+    updated[i] = { ...updated[i], bold: !updated[i].bold }
+    setValue(`experience.${expIndex}.descriptions`, updated)
+  }
+
+  const toggleItalic = (i: number) => {
+    const updated = [...descriptions]
+    updated[i] = { ...updated[i], italic: !updated[i].italic }
+    setValue(`experience.${expIndex}.descriptions`, updated)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = itemIds.indexOf(active.id as string)
+    const newIndex = itemIds.indexOf(over.id as string)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const updated = [...descriptions]
+    const [moved] = updated.splice(oldIndex, 1)
+    updated.splice(newIndex, 0, moved)
+    setValue(`experience.${expIndex}.descriptions`, updated)
+  }
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -85,32 +245,24 @@ function DescriptionsList({ expIndex }: { expIndex: number }) {
           <Plus className="h-3 w-3 mr-1" /> 항목 추가
         </Button>
       </div>
-      {descriptions.map((desc: any, i: number) => {
-        const level = desc.level ?? 1
-        const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[1]
-        return (
-          <div key={i} className="flex items-start gap-2" style={{ paddingLeft: config.indent }}>
-            <button
-              type="button"
-              className="w-4 text-center text-neutral-400 text-sm shrink-0 hover:text-neutral-700 cursor-pointer mt-2.5"
-              title={`클릭하여 변경 (현재: ${config.label})`}
-              onClick={() => cycleLevel(i)}
-            >
-              {config.symbol || '—'}
-            </button>
-            <Textarea
-              className="flex-1 min-h-[36px] resize-none"
-              rows={2}
-              placeholder="업무 내용을 입력하세요"
-              value={desc.text || ''}
-              onChange={(e) => updateText(i, e.target.value)}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {descriptions.map((desc: any, i: number) => (
+            <SortableDescriptionItem
+              key={itemIds[i]}
+              id={itemIds[i]}
+              index={i}
+              desc={desc}
+              onUpdateText={updateText}
+              onCycleLevel={cycleLevel}
+              onToggleBold={toggleBold}
+              onToggleItalic={toggleItalic}
+              onRemove={removeItem}
+              onInsertBelow={insertBelow}
             />
-            <Button type="button" variant="ghost" size="sm" className="mt-1" onClick={() => removeItem(i)}>
-              <Trash2 className="h-3 w-3 text-red-500" />
-            </Button>
-          </div>
-        )
-      })}
+          ))}
+        </SortableContext>
+      </DndContext>
       {descriptions.length === 0 && (
         <p className="text-xs text-neutral-400">항목 추가 버튼을 눌러 업무 내용을 추가하세요</p>
       )}
@@ -151,10 +303,10 @@ function ExperienceSection() {
   const { fields, append, remove, move } = useFieldArray({ control, name: 'experience' })
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pt-2">
       <div className="flex items-center justify-between">
         <SectionTitleInput name="sectionTitles.experience" />
-        <Button type="button" variant="outline" size="sm" onClick={() => append({ company: '', role: '', startDate: '', endDate: '현재', descriptions: [] })}>
+        <Button type="button" variant="outline" size="sm" onClick={() => append({ company: '', role: '', subtitle: '', startDate: '', endDate: '현재', descriptions: [] })}>
           <Plus className="h-4 w-4 mr-1" /> 추가
         </Button>
       </div>
@@ -178,6 +330,9 @@ function ExperienceSection() {
               <FormItem><FormLabel>종료일</FormLabel><FormControl><Input placeholder="현재" {...field} /></FormControl></FormItem>
             )} />
           </div>
+          <FormField control={control} name={`experience.${index}.subtitle`} render={({ field }) => (
+            <FormItem><FormLabel>한줄 설명</FormLabel><FormControl><Input placeholder="역할에 대한 간단한 설명 (선택)" {...field} /></FormControl></FormItem>
+          )} />
           <DescriptionsList expIndex={index} />
         </div>
       ))}
@@ -191,7 +346,7 @@ function SkillsSection() {
   const { fields, append, remove, move } = useFieldArray({ control, name: 'skills' })
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pt-2">
       <div className="flex items-center justify-between">
         <SectionTitleInput name="sectionTitles.skills" />
         <Button type="button" variant="outline" size="sm" onClick={() => append({ category: '', items: '' })}>
@@ -224,7 +379,7 @@ function EducationSection() {
   const { fields, append, remove, move } = useFieldArray({ control, name: 'education' })
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pt-2">
       <div className="flex items-center justify-between">
         <SectionTitleInput name="sectionTitles.education" />
         <Button type="button" variant="outline" size="sm" onClick={() => append({ school: '', major: '', startDate: '', endDate: '' })}>
@@ -263,7 +418,7 @@ function CertificationsSection() {
   const { fields, append, remove, move } = useFieldArray({ control, name: 'certifications' })
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pt-2">
       <div className="flex items-center justify-between">
         <SectionTitleInput name="sectionTitles.certifications" />
         <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', startDate: '', endDate: '' })}>
@@ -276,10 +431,10 @@ function CertificationsSection() {
             <FormItem className="flex-1"><FormControl><Input placeholder="자격증, 수상, 활동 등" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={control} name={`certifications.${index}.startDate`} render={({ field }) => (
-            <FormItem className="w-24"><FormControl><Input placeholder="날짜" {...field} /></FormControl></FormItem>
+            <FormItem className="w-28"><FormControl><Input placeholder="취득일" {...field} /></FormControl></FormItem>
           )} />
           <FormField control={control} name={`certifications.${index}.endDate`} render={({ field }) => (
-            <FormItem className="w-24"><FormControl><Input placeholder="날짜" {...field} /></FormControl></FormItem>
+            <FormItem className="w-28"><FormControl><Input placeholder="만료일" {...field} /></FormControl></FormItem>
           )} />
           <div className="flex gap-1 shrink-0">
             <ItemControls index={index} total={fields.length} onMove={move} onRemove={remove} />
@@ -296,34 +451,53 @@ function CustomSectionsEditor() {
   const { fields, append, remove, move } = useFieldArray({ control, name: 'customSections' })
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 pt-2">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold">추가 섹션</h3>
-        <Button type="button" variant="outline" size="sm" onClick={() => append({ title: '', items: [] })}>
+        <Button type="button" variant="outline" size="sm" onClick={() => append({ title: '', layout: 'simple', items: [] })}>
           <Plus className="h-4 w-4 mr-1" /> 섹션 추가
         </Button>
       </div>
-      {fields.map((field, sectionIndex) => (
-        <div key={field.id} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <FormField control={control} name={`customSections.${sectionIndex}.title`} render={({ field }) => (
-              <FormItem className="flex-1"><FormControl><Input placeholder="섹션 제목 (예: PROJECTS)" className="font-semibold" {...field} /></FormControl></FormItem>
-            )} />
-            <ItemControls index={sectionIndex} total={fields.length} onMove={move} onRemove={remove} />
+      {fields.map((field, sectionIndex) => {
+        const layout = watch(`customSections.${sectionIndex}.layout`) || 'simple'
+        return (
+          <div key={field.id} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <FormField control={control} name={`customSections.${sectionIndex}.title`} render={({ field }) => (
+                <FormItem className="flex-1"><FormControl><Input placeholder="섹션 제목 (예: PROJECTS)" className="font-semibold" {...field} /></FormControl></FormItem>
+              )} />
+              <ItemControls index={sectionIndex} total={fields.length} onMove={move} onRemove={remove} />
+            </div>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                className={`text-xs px-2.5 py-1 rounded-full border cursor-pointer transition-colors ${layout === 'simple' ? 'bg-neutral-800 text-white border-neutral-800 dark:bg-neutral-200 dark:text-neutral-900 dark:border-neutral-200' : 'border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-neutral-400'}`}
+                onClick={() => setValue(`customSections.${sectionIndex}.layout`, 'simple')}
+              >
+                한줄 + 날짜
+              </button>
+              <button
+                type="button"
+                className={`text-xs px-2.5 py-1 rounded-full border cursor-pointer transition-colors ${layout === 'detailed' ? 'bg-neutral-800 text-white border-neutral-800 dark:bg-neutral-200 dark:text-neutral-900 dark:border-neutral-200' : 'border-neutral-300 dark:border-neutral-600 text-neutral-500 hover:border-neutral-400'}`}
+                onClick={() => setValue(`customSections.${sectionIndex}.layout`, 'detailed')}
+              >
+                타이틀 + 서브타이틀
+              </button>
+            </div>
+            <CustomSectionItems sectionIndex={sectionIndex} layout={layout} />
           </div>
-          <CustomSectionItems sectionIndex={sectionIndex} />
-        </div>
-      ))}
+        )
+      })}
     </section>
   )
 }
 
-function CustomSectionItems({ sectionIndex }: { sectionIndex: number }) {
+function CustomSectionItems({ sectionIndex, layout }: { sectionIndex: number; layout: string }) {
   const { setValue, watch } = useFormContext<ResumeData>()
   const items = watch(`customSections.${sectionIndex}.items`) || []
 
   const addItem = () => {
-    setValue(`customSections.${sectionIndex}.items`, [...items, { text: '', startDate: '', endDate: '' }])
+    setValue(`customSections.${sectionIndex}.items`, [...items, { text: '', subtitle: '', startDate: '', endDate: '' }])
   }
   const removeItem = (i: number) => {
     setValue(`customSections.${sectionIndex}.items`, items.filter((_: any, idx: number) => idx !== i))
@@ -337,13 +511,29 @@ function CustomSectionItems({ sectionIndex }: { sectionIndex: number }) {
   return (
     <div className="space-y-2">
       {items.map((item: any, i: number) => (
-        <div key={i} className="flex items-center gap-2">
-          <Input className="flex-1" placeholder="내용" value={item.text || ''} onChange={(e) => updateField(i, 'text', e.target.value)} />
-          <Input className="w-24" placeholder="날짜" value={item.startDate || ''} onChange={(e) => updateField(i, 'startDate', e.target.value)} />
-          <Input className="w-24" placeholder="날짜" value={item.endDate || ''} onChange={(e) => updateField(i, 'endDate', e.target.value)} />
-          <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(i)}>
-            <Trash2 className="h-3 w-3 text-red-500" />
-          </Button>
+        <div key={i} className="space-y-1.5">
+          {layout === 'simple' ? (
+            <div className="flex items-center gap-2">
+              <Input className="flex-1" placeholder="내용" value={item.text || ''} onChange={(e) => updateField(i, 'text', e.target.value)} />
+              <Input className="w-28" placeholder="시작일" value={item.startDate || ''} onChange={(e) => updateField(i, 'startDate', e.target.value)} />
+              <Input className="w-28" placeholder="종료일" value={item.endDate || ''} onChange={(e) => updateField(i, 'endDate', e.target.value)} />
+              <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(i)}>
+                <Trash2 className="h-3 w-3 text-red-500" />
+              </Button>
+            </div>
+          ) : (
+            <div className="border border-neutral-100 dark:border-neutral-800 rounded-md p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Input className="flex-1" placeholder="타이틀" value={item.text || ''} onChange={(e) => updateField(i, 'text', e.target.value)} />
+                <Input className="w-28" placeholder="시작일" value={item.startDate || ''} onChange={(e) => updateField(i, 'startDate', e.target.value)} />
+                <Input className="w-28" placeholder="종료일" value={item.endDate || ''} onChange={(e) => updateField(i, 'endDate', e.target.value)} />
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(i)}>
+                  <Trash2 className="h-3 w-3 text-red-500" />
+                </Button>
+              </div>
+              <Input placeholder="서브타이틀 (선택)" value={item.subtitle || ''} onChange={(e) => updateField(i, 'subtitle', e.target.value)} />
+            </div>
+          )}
         </div>
       ))}
       <Button type="button" variant="ghost" size="sm" onClick={addItem}>
@@ -508,8 +698,11 @@ export default function ResumeEditPage() {
         const raw = resume.data || {}
         const migratedExperience = (raw.experience || []).map((exp: any) => ({
           ...exp,
+          subtitle: exp.subtitle || '',
           descriptions: (exp.descriptions || []).map((d: any) =>
-            typeof d === 'string' ? { text: d, level: 1 } : d
+            typeof d === 'string'
+              ? { text: d, level: 1, bold: false, italic: false }
+              : { ...d, bold: d.bold ?? false, italic: d.italic ?? false }
           ),
         }))
         // certifications 마이그레이션 (날짜 필드 추가)
@@ -526,7 +719,14 @@ export default function ResumeEditPage() {
           experience: migratedExperience,
           certifications: migratedCerts,
           keywords: raw.keywords || [],
-          customSections: raw.customSections || [],
+          customSections: (raw.customSections || []).map((s: any) => ({
+            ...s,
+            layout: s.layout || 'simple',
+            items: (s.items || []).map((item: any) => ({
+              ...item,
+              subtitle: item.subtitle || '',
+            })),
+          })),
         }
         form.reset(merged)
       }
@@ -566,7 +766,7 @@ export default function ResumeEditPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full mx-auto max-w-xl p-6 flex justify-center items-center min-h-[50vh]">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
@@ -574,12 +774,10 @@ export default function ResumeEditPage() {
 
   if (!session) {
     return (
-      <div className="w-full mx-auto max-w-xl p-6">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>접근 권한 없음</AlertTitle>
-          <AlertDescription>이 페이지에 접근할 권한이 없습니다.</AlertDescription>
-        </Alert>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-neutral-500">
+        <AlertTriangle className="h-8 w-8 mb-3 text-neutral-400" />
+        <p className="text-lg font-medium">접근 권한 없음</p>
+        <p className="text-sm mt-1">이 페이지에 접근할 권한이 없습니다.</p>
       </div>
     )
   }
@@ -590,12 +788,12 @@ export default function ResumeEditPage() {
         <CardHeader><CardTitle>이력서 편집</CardTitle></CardHeader>
         <CardContent>
           <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6 text-left">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8 divide-y divide-neutral-200 dark:divide-neutral-700 text-left">
 
               {/* === Profile === */}
               <section className="space-y-3">
                 <h3 className="text-base font-semibold">Profile</h3>
-                <div className="flex gap-6">
+                <div className="flex flex-col-reverse sm:flex-row gap-6">
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <FormField control={form.control} name="profile.name" render={({ field }) => (
                       <FormItem><FormLabel>이름</FormLabel><FormControl><Input placeholder="이름" {...field} /></FormControl></FormItem>
@@ -621,7 +819,7 @@ export default function ResumeEditPage() {
               </section>
 
               {/* === Summary + Keywords === */}
-              <section className="space-y-3">
+              <section className="space-y-3 pt-2">
                 <SectionTitleInput name="sectionTitles.summary" />
                 <FormField control={form.control} name="summary" render={({ field }) => (
                   <FormItem><FormControl><Textarea placeholder="자기소개를 작성하세요" rows={4} {...field} /></FormControl></FormItem>
@@ -637,12 +835,13 @@ export default function ResumeEditPage() {
               <CustomSectionsEditor />
 
               {/* === Actions === */}
-              <div className="flex items-center justify-between mt-4">
+              <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-neutral-200 dark:border-neutral-700 -mx-6 px-6 py-4 flex items-center justify-between mt-4">
                 <Button type="button" className="cursor-pointer" variant="secondary" onClick={() => router.back()}>
                   <MoveLeft className="h-4 w-4" /> Back
                 </Button>
                 <Button type="submit" className="cursor-pointer" disabled={isSaving}>
-                  <Check className="h-4 w-4" /> {isSaving ? '저장 중...' : '저장'}
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  {isSaving ? '저장 중...' : '저장'}
                 </Button>
               </div>
             </form>

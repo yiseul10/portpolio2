@@ -6,6 +6,15 @@ import rehypeRaw from 'rehype-raw'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
+/** 연속 빈 줄(3개 이상 개행)을 <br/> 스페이서로 변환하여 의도한 간격 유지 */
+function preserveSpacing(source: string): string {
+  return source.replace(/\n{3,}/g, (match) => {
+    const extraBreaks = match.length - 2
+    const spacers = Array(extraBreaks).fill('<br/>').join('\n')
+    return '\n\n' + spacers + '\n\n'
+  })
+}
+
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
     <th key={index}>{header}</th>
@@ -73,24 +82,39 @@ const components = {
     if (href.startsWith('#')) return <a href={href} {...props}>{children}</a>
     return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>
   },
+  pre: ({ children, ...props }) => {
+    const codeChild = React.Children.toArray(children).find(
+      (child) => React.isValidElement(child) && (child as React.ReactElement<any>).props?.className?.startsWith('language-')
+    )
+    const lang = React.isValidElement(codeChild)
+      ? ((codeChild as React.ReactElement<any>).props.className as string)?.replace('language-', '') || ''
+      : ''
+    return (
+      <div className="code-block-wrapper">
+        {lang && <div className="code-block-lang">{lang}</div>}
+        <pre {...props}>{children}</pre>
+      </div>
+    )
+  },
   code: ({ children, className, ...props }) => {
     const isInline = !className
     if (isInline) {
-      return <code {...props}>{children}</code>
+      return <code className="inline-code" {...props}>{children}</code>
     }
-    const codeHTML = highlight(String(children))
+    const codeHTML = highlight(String(children).replace(/\n$/, ''))
     return <code className={className} dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
   },
 }
 
 export function CustomMDX({ source, components: extraComponents }: { source: string, components?: Record<string, any> }) {
+  const processed = preserveSpacing(source || '')
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
       components={{ ...components, ...(extraComponents || {}) } as any}
     >
-      {source}
+      {processed}
     </ReactMarkdown>
   )
 }
