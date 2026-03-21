@@ -6,8 +6,8 @@ import { getModel, DEFAULT_PROVIDER } from '@lib/chat/model-config'
 
 export const runtime = 'nodejs'
 
-function getClientIP(): string {
-  const headersList = headers()
+async function getClientIP(): Promise<string> {
+  const headersList = await headers()
   return (
     headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     headersList.get('x-real-ip') ||
@@ -16,7 +16,15 @@ function getClientIP(): string {
 }
 
 export async function POST(req: Request) {
-  const ip = getClientIP()
+  // API 키 사전 검증
+  if (!process.env.OPENAI_API_KEY) {
+    return Response.json(
+      { error: 'AI 서비스 설정에 문제가 있어요. 관리자에게 알려주세요.' },
+      { status: 500 }
+    )
+  }
+
+  const ip = await getClientIP()
 
   // Rate limit 체크
   const { allowed, remaining } = checkRateLimit(ip)
@@ -43,6 +51,7 @@ export async function POST(req: Request) {
     model: getModel(DEFAULT_PROVIDER),
     system: systemPrompt,
     messages: modelMessages,
+    maxOutputTokens: 500,
   })
 
   return result.toUIMessageStreamResponse()
@@ -50,7 +59,7 @@ export async function POST(req: Request) {
 
 // 남은 횟수 조회용 GET 엔드포인트
 export async function GET() {
-  const ip = getClientIP()
+  const ip = await getClientIP()
   const remaining = getRemainingCount(ip)
 
   return Response.json({ remaining })
