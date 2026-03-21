@@ -84,43 +84,32 @@ export function ChatBot() {
     <>
       {/* 채팅 패널 */}
       <div
-        className={`cursor-pointer fixed bottom-20 right-8 w-[calc(100vw-2rem)] sm:w-[380px] h-[520px] max-h-[calc(100vh-7rem)] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-zinc-800 z-50 transition-all duration-300 origin-bottom-right ${
+        className={`cursor-pointer fixed bottom-24 right-4 left-4 sm:left-auto sm:right-8 sm:w-[380px] h-[520px] max-h-[calc(100vh-7rem)] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-zinc-800 z-50 transition-all duration-300 origin-bottom-right ${
           isOpen
             ? 'scale-100 opacity-100 pointer-events-auto'
             : 'scale-95 opacity-0 pointer-events-none'
         }`}
       >
-        {/* 헤더 */}
-        <div className="px-4 py-3.5 bg-zinc-900 dark:bg-zinc-800 text-white flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-zinc-700 rounded-full overflow-hidden flex items-center justify-center">
-              <Image
-                src="/images/avatar.png"
-                alt="이슬"
-                width={26}
-                height={26}
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <div className="font-semibold text-sm">이슬이에게 물어보세요</div>
-              <div className="text-[10px] text-zinc-400 mt-0.5">
-                무엇이든 물어보세요?!
+        {/* 스크롤 영역 (헤더 + 메시지) — 헤더가 sticky로 떠서 대화가 뒤로 비침 */}
+        <div className="flex-1 overflow-y-auto">
+          {/* 헤더 (글래스모피즘) */}
+          <div className="sticky top-0 z-10 px-4 py-3.5 bg-white/5 dark:bg-black/60 backdrop-blur-xs text-neutral-800 flex items-center border-b border-white/10 rounded-t-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
+                <Bot className="text-neutral-800 font-serif font-black text-xl"/>
+              </div>
+              <div>
+                <div className="font-semibold text-sm">이슬이에게 물어보세요</div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">
+                  무엇이든 물어보세요?!
+                </div>
               </div>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/20 transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
 
-        {/* 메시지 영역 */}
-        <ChatMessages messages={messages} isLoading={isLoading} />
+          {/* 메시지 영역 */}
+          <ChatMessages messages={messages} isLoading={isLoading} />
+        </div>
 
         {/* Rate limit 에러 메시지 */}
         {rateLimitError ? (

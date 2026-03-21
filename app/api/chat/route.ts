@@ -3,16 +3,18 @@ import { headers } from 'next/headers'
 import { checkRateLimit, getRemainingCount } from '@lib/chat/rate-limit'
 import { buildContext } from '@lib/chat/build-context'
 import { getModel, DEFAULT_PROVIDER } from '@lib/chat/model-config'
+import { supabase } from '@lib/superbase'
 
 export const runtime = 'nodejs'
 
-async function getClientIP(): Promise<string> {
+async function getClientInfo(): Promise<{ ip: string; userAgent: string }> {
   const headersList = await headers()
-  return (
+  const ip =
     headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     headersList.get('x-real-ip') ||
     'unknown'
-  )
+  const userAgent = headersList.get('user-agent') || 'unknown'
+  return { ip, userAgent }
 }
 
 export async function POST(req: Request) {
@@ -24,10 +26,10 @@ export async function POST(req: Request) {
     )
   }
 
-  const ip = await getClientIP()
+  const { ip, userAgent } = await getClientInfo()
 
   // Rate limit 체크
-  const { allowed, remaining } = checkRateLimit(ip)
+  const { allowed, remaining } = await checkRateLimit(ip)
   if (!allowed) {
     return Response.json(
       { error: '오늘 사용 횟수를 모두 사용했어요. 내일 다시 물어봐주세요!' },
@@ -46,12 +48,34 @@ export async function POST(req: Request) {
   // UIMessage → ModelMessage 변환
   const modelMessages = await convertToModelMessages(messages)
 
+  // 마지막 유저 메시지 추출
+  const lastUserMessage = messages
+    .filter(m => m.role === 'user')
+    .pop()
+    ?.parts
+    ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+    .map(p => p.text)
+    .join('') ?? ''
+
   // 스트리밍 호출
   const result = streamText({
     model: getModel(DEFAULT_PROVIDER),
     system: systemPrompt,
     messages: modelMessages,
     maxOutputTokens: 500,
+    async onFinish({ text }) {
+      // 대화 로그 저장 (비동기, 실패해도 응답에 영향 없음)
+      try {
+        await supabase.from('chat_logs').insert({
+          ip,
+          user_agent: userAgent,
+          user_message: lastUserMessage,
+          assistant_message: text,
+        })
+      } catch (e) {
+        console.error('Failed to save chat log:', e)
+      }
+    },
   })
 
   return result.toUIMessageStreamResponse()
@@ -59,8 +83,8 @@ export async function POST(req: Request) {
 
 // 남은 횟수 조회용 GET 엔드포인트
 export async function GET() {
-  const ip = await getClientIP()
-  const remaining = getRemainingCount(ip)
+  const { ip } = await getClientInfo()
+  const remaining = await getRemainingCount(ip)
 
   return Response.json({ remaining })
 }

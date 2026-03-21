@@ -25,6 +25,7 @@
 
 # claude code
 .claude/
+.superpowers/
 
 # debug
 npm-debug.log*

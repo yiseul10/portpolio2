@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import type { UIMessage } from 'ai'
+import { ChatAvatar } from './ChatAvatar'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -31,15 +31,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
 
   return (
     <div className="flex gap-2 items-start">
-      <div className="w-7 h-7 bg-zinc-900 dark:bg-zinc-100 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center">
-        <Image
-          src="/images/avatar.png"
-          alt="이슬"
-          width={22}
-          height={22}
-          className="object-contain"
-        />
-      </div>
+      <ChatAvatar />
       <div className="bg-gray-100 dark:bg-zinc-800 px-3.5 py-2.5 rounded-tr-xl rounded-br-xl rounded-bl-xl text-sm max-w-[85%] leading-relaxed text-zinc-800 dark:text-zinc-200">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}

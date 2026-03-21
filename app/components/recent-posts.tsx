@@ -28,7 +28,7 @@ export function RecentPosts() {
 
   return (
     <div className="w-full flex flex-col gap-8">
-      <div className="flex items-center gap-1 -mb-10">
+      <div className="flex items-center gap-1 -mb-6">
         <span className="px-2.5 py-1 rounded-sm text-xs font-medium bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900">
           Recent
         </span>

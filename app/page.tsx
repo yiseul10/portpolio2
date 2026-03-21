@@ -6,7 +6,6 @@ export default function Page() {
     <section className="w-full flex flex-col items-center">
       {/* Featured / About Card */}
       <FeaturedPost />
-
       {/* Post List */}
       <div className="w-full mt-8">
         <RecentPosts />

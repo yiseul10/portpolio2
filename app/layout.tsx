@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import Footer from './components/footer'
 import { Toaster } from "sonner";
+import { ChatBot } from './components/chatbot/ChatBot'
 
 const newsreader = Newsreader({
   subsets: ['latin'],
@@ -79,6 +80,7 @@ export default function RootLayout({
       <Toaster />
     </main>
     <Footer />
+    <ChatBot />
     <Analytics />
     <SpeedInsights />
     </body>

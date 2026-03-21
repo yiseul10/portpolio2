@@ -73,7 +73,7 @@ export function FeaturedPost() {
 
             {/* keywords */}
             {keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-3 ">
                 {keywords.map((kw, i) => (
                   <span
                     key={i}
