@@ -26,6 +26,7 @@ export function RecentPosts() {
 
   if (posts.length === 0) return null
 
+
   return (
     <div className="w-full flex flex-col gap-8">
       <div className="flex items-center gap-1 -mb-6">
