@@ -94,16 +94,13 @@ export function ResumeTemplate({ data }: { data: any }) {
 
       {/* 소개 */}
       {summary && (
-        <section className="mb-2">
-          {/*<h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">*/}
-          {/*  {titles.summary}*/}
-          {/*</h2>*/}
+        <section className="mb-4">
           <span className="text-base  leading-relaxed text-neutral-700  whitespace-pre-line">
             {summary}
           </span>
           {/* 해시태그 키워드 */}
           {keywords.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-4">
               {keywords.map((kw: string, i: number) => (
                 <span
                   key={i}
@@ -120,9 +117,6 @@ export function ResumeTemplate({ data }: { data: any }) {
       {/* 기술 스택 */}
       {skills.length > 0 && (
           <section className="mb-14">
-            {/*<h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 pb-1">*/}
-            {/*  {titles.skills}*/}
-            {/*</h2>*/}
             <div className="w-full gap-5 text-sm">
               {skills.map((group: any, i: number) => (
                   <div key={i}>
@@ -158,19 +152,19 @@ export function ResumeTemplate({ data }: { data: any }) {
               <div key={i}>
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-black">{exp.company}</h3>
-                  <span className="text-xs text-neutral-500 shrink-0 ml-4">
+                  <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
                     {exp.startDate} - {exp.endDate}
                   </span>
                 </div>
                 {exp.role && (
-                  <p className="text-sm text-neutral-500">{exp.role}</p>
+                  <p className="text-sm text-neutral-500 print:text-[14px]">{exp.role}</p>
                 )}
                 {exp.subtitle && (
-                  <p className="text-sm text-neutral-500 font-semibold italic mt-2 mb-3">{exp.subtitle}</p>
+                  <p className="text-sm text-neutral-500 font-semibold italic mt-2 mb-3 print:text-[14px]">{exp.subtitle}</p>
                 )}
                 {!exp.subtitle && exp.role && <div className="mb-2" />}
                 {Array.isArray(exp.descriptions) && exp.descriptions.length > 0 && (
-                  <ul className="text-sm text-neutral-700 mt-4">
+                  <ul className="text-sm text-neutral-700 mt-4 print:text-base">
                     {exp.descriptions.map((desc: any, j: number) => {
                       const item = typeof desc === 'string'
                         ? { text: desc, level: 1, bold: false, italic: false }
@@ -230,13 +224,13 @@ export function ResumeTemplate({ data }: { data: any }) {
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-medium text-sm">{edu.school}</h3>
                   {(edu.startDate || edu.endDate) && (
-                    <span className="text-xs text-neutral-500 shrink-0 ml-4">
+                    <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
                       {edu.startDate} - {edu.endDate}
                     </span>
                   )}
                 </div>
                 {edu.major && (
-                  <p className="text-sm text-neutral-500">{edu.major}</p>
+                  <p className="text-sm text-neutral-500 ">{edu.major}</p>
                 )}
               </div>
             ))}
@@ -254,9 +248,9 @@ export function ResumeTemplate({ data }: { data: any }) {
             {certifications.map((cert: any, i: number) => (
               <div key={i}>
                 <div className="flex justify-between items-baseline">
-                  <h3 className="font-medium text-sm">{cert.name}</h3>
+                  <h3 className="font-medium text-sm ">{cert.name}</h3>
                   {(cert.startDate || cert.endDate) && (
-                    <span className="text-xs text-neutral-500 shrink-0 ml-4">
+                    <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
                       {cert.startDate}{cert.startDate && cert.endDate && ' - '}{cert.endDate}
                     </span>
                   )}
@@ -284,13 +278,13 @@ export function ResumeTemplate({ data }: { data: any }) {
                     <div className="flex justify-between items-baseline">
                       <h3 className="font-medium text-sm">{item.text}</h3>
                       {(item.startDate || item.endDate) && (
-                        <span className="text-xs text-neutral-500 shrink-0 ml-4">
+                        <span className="text-xs text-neutral-500 shrink-0 ml-4 ">
                           {item.startDate}{item.startDate && item.endDate && ' - '}{item.endDate}
                         </span>
                       )}
                     </div>
                     {item.subtitle && (
-                      <p className="text-sm text-neutral-500">{item.subtitle}</p>
+                      <p className="text-sm text-neutral-500 ">{item.subtitle}</p>
                     )}
                   </div>
                 ) : (

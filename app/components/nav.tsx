@@ -54,7 +54,7 @@ export function Navbar() {
                   href={path}
                   className="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
                 >
-                 <span className="text-xs font-bold text-neutral-800">{name.toLocaleUpperCase()}</span>
+                 <span className="text-xs font-semibold tracking-wider text-neutral-800 dark:text-neutral-200">{name.toLocaleUpperCase()}</span>
                 </Link>
               )
             })}

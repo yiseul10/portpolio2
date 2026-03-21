@@ -1,78 +1,24 @@
 'use client'
-import Link from 'next/link'
-import {formatDate} from "@/app/blog/utils/post.server";
+
 import { useEffect, useState, useCallback } from 'react'
-import {Card} from "@/components/ui/card";
-import Image from 'next/image'
-import {Session} from "@supabase/supabase-js";
-import {supabase} from "@lib/superbase";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Eye, EyeClosed, ChevronLeft, ChevronRight, ArrowRight} from "lucide-react";
+import { Session } from '@supabase/supabase-js'
+import { supabase } from '@lib/superbase'
+import { Button } from '@/components/ui/button'
+import { Eye, EyeClosed, ChevronLeft, ChevronRight } from 'lucide-react'
+import { PostItem } from '@/app/components/post-item'
 
 export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 10
 
 interface BlogPostsProps {
-  limit?: number           // 메인페이지용: 최근 N개만
-  showMoreLink?: boolean   // 메인페이지용: 더보기 링크
-  showFilter?: boolean     // 블로그페이지용: 공개/비공개 필터
-  showPagination?: boolean // 블로그페이지용: 페이징
+  showFilter?: boolean
+  showPagination?: boolean
 }
 
 type FilterType = 'published' | 'draft'
 
-function PostCard({ post, session }: { post: any; session: Session | null }) {
-  return (
-    <Link
-      key={post.slug}
-      className="flex flex-col mb-3"
-      href={`/blog/${post.slug}`}
-    >
-      <Card className="px-4">
-        <div className="flex items-center justify-between">
-          <div className="w-full flex flex-col space-x-0 md:space-x-2">
-            <div className="flex gap-1 items-center justify-between">
-              <p className="text-neutral-900 dark:text-neutral-100 font-bold text-[13px] hover:underline">
-                {post.title}
-              </p>
-              {session && (
-                !post.published ? (
-                  <Badge variant="destructive" className="text-[11px] opacity-90">
-                    <EyeClosed className="w-3 h-3" />
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-[11px] opacity-90">
-                    <Eye className="w-3 h-3" />
-                  </Badge>
-                )
-              )}
-            </div>
-            <p className="text-neutral-600 text-xs font-semibold dark:text-neutral-400 min-w-[160px] tabular-nums">
-              {formatDate(post.created_at, false)}
-            </p>
-          </div>
-          {post?.image && (
-            <div className="ml-4 shrink-0">
-              <Image
-                src={post.image}
-                alt={post.title}
-                width={140}
-                height={80}
-                className="rounded-md object-cover"
-              />
-            </div>
-          )}
-        </div>
-      </Card>
-    </Link>
-  )
-}
-
 export function BlogPosts({
-  limit,
-  showMoreLink = false,
   showFilter = false,
   showPagination = false,
 }: BlogPostsProps) {
@@ -86,36 +32,14 @@ export function BlogPosts({
   const fetchPosts = useCallback(async (currentSession: Session | null) => {
     setIsLoading(true)
 
-    // limit 모드 (메인 페이지): 공개글만 N개
-    if (limit) {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-        .range(0, limit - 1)
-
-      if (error) {
-        console.error('❌ Supabase error:', error.message)
-        setPosts([])
-      } else {
-        setPosts(data || [])
-      }
-      setIsLoading(false)
-      return
-    }
-
-    // 블로그 페이지: 필터 + 페이징
     let query = supabase
       .from('posts')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
 
     if (!currentSession) {
-      // 비로그인: 공개글만
       query = query.eq('published', true)
     } else {
-      // 로그인: 필터에 따라
       if (filter === 'published') {
         query = query.eq('published', true)
       } else {
@@ -132,7 +56,7 @@ export function BlogPosts({
     const { data, error, count } = await query
 
     if (error) {
-      console.error('❌ Supabase error:', error.message)
+      console.error('Supabase error:', error.message)
       setPosts([])
       setTotalCount(0)
     } else {
@@ -141,7 +65,7 @@ export function BlogPosts({
     }
 
     setIsLoading(false)
-  }, [limit, filter, page, showPagination])
+  }, [filter, page, showPagination])
 
   useEffect(() => {
     const init = async () => {
@@ -162,7 +86,6 @@ export function BlogPosts({
     }
   }, [])
 
-  // 필터나 페이지 변경 시 다시 로드
   useEffect(() => {
     fetchPosts(session)
   }, [filter, page, fetchPosts])
@@ -181,7 +104,7 @@ export function BlogPosts({
     <div>
       {/* 필터 탭 */}
       {showFilter && session && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-6">
           <Button
             variant={filter === 'published' ? 'default' : 'outline'}
             size="sm"
@@ -202,21 +125,15 @@ export function BlogPosts({
       )}
 
       {/* 포스트 목록 */}
-      {posts.map((post) => (
-        <PostCard key={post.slug} post={post} session={session} />
-      ))}
+      <div className="w-full flex flex-col gap-8">
+        {posts.map((post) => (
+          <PostItem key={post.slug} post={post} session={session} />
+        ))}
+      </div>
 
-      {/* 더보기 링크 (메인 페이지) */}
-      {showMoreLink && (
-        <Link href="/blog" className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 mt-2 transition-colors">
-          더보기
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      )}
-
-      {/* 페이징 (블로그 페이지) */}
+      {/* 페이징 */}
       {showPagination && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
+        <div className="flex items-center justify-center gap-2 mt-8">
           <Button
             variant="outline"
             size="icon-sm"

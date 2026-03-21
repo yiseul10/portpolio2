@@ -447,7 +447,24 @@ export const TiptapEditor = React.forwardRef<HTMLDivElement, TiptapEditorProps>(
       ],
       content: value,
       onUpdate: ({ editor }) => {
-        const md = (editor.storage as any).markdown.getMarkdown()
+        // ProseMirror 문서 트리를 순회하여 빈 paragraph를 &nbsp;로 보존
+        const doc = editor.state.doc
+        const fragments: string[] = []
+        doc.forEach((node) => {
+          if (node.type.name === 'paragraph' && node.textContent.trim() === '') {
+            fragments.push('&nbsp;')
+          }
+        })
+
+        let md = (editor.storage as any).markdown.getMarkdown()
+
+        // 빈 paragraph가 있었다면 마크다운에서도 보존
+        // getMarkdown()은 빈 paragraph를 빈 줄(\n\n)로 변환하지만 연속 시 합쳐질 수 있음
+        // 연속된 빈 줄 2개를 &nbsp; 삽입으로 보존
+        if (fragments.length > 0) {
+          md = md.replace(/\n\n\n/g, '\n\n&nbsp;\n\n')
+        }
+
         onChange(md)
       },
       editorProps: {
