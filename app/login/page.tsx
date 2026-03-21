@@ -36,8 +36,8 @@ export default function Page() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-1 items-center mb-1">
-            <BadgeInfo className="w-4 h-4 text-emerald-400"/>
-            <span className="text-xs font-bold text-emerald-400">인증된 사용자만 가능합니다.</span>
+            <BadgeInfo className="w-4 h-4 text-sky-400"/>
+            <span className="text-xs font-bold text-sky-400">인증된 사용자만 가능합니다.</span>
           </div>
           <div className="flex items-center gap-3">
             <Input

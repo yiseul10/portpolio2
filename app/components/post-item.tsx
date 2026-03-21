@@ -43,6 +43,12 @@ export function PostItem({ post, session, showDescription = true, showBorder = t
         )}
         <div className="mt-1 text-xs text-gray-500 dark:text-neutral-500 font-medium tracking-wide">
           <span>{formatDate(post.created_at, false)}</span>
+          {post.category && (
+            <>
+              <span className="mx-1">·</span>
+              <span>{post.category === 'experience' ? 'Experience' : 'Study'}</span>
+            </>
+          )}
           {post.tags && post.tags.length > 0 && (
             <>
               <span className="mx-1">·</span>

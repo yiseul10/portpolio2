@@ -27,6 +27,14 @@ export function RecentPosts() {
 
   return (
     <div className="w-full flex flex-col gap-8">
+      <div className="flex items-center gap-1 -mb-10">
+        <span className="px-2.5 py-1 rounded-sm text-xs font-medium bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900">
+          Recent
+        </span>
+        <span className="px-2.5 py-1 rounded-sm text-xs font-medium bg-[#efe4bb]/80 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+          Experience
+        </span>
+      </div>
       {posts.map((post, index) => (
         <div
           key={post.slug}

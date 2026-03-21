@@ -155,7 +155,7 @@ body {
 /* === Post Title Hover (lavender gradient highlight 100%→20%) === */
 .post-title-hover {
   background-image: linear-gradient(to right, #e0d4f5, rgba(224, 212, 245, 0.2));
-  background-size: 0% 40%;
+  background-size: 0% 60%;
   background-position: left bottom;
   background-repeat: no-repeat;
   text-decoration: none;
@@ -164,7 +164,7 @@ body {
 }
 
 .post-title-hover:hover {
-  background-size: 100% 40%;
+  background-size: 100% 60%;
 }
 
 .dark .post-title-hover {

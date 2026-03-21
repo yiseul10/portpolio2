@@ -2,13 +2,17 @@
 import Link from 'next/link'
 import {Button} from "@/components/ui/button";
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import type { ComponentType } from 'react'
 
 import type { Session } from '@supabase/supabase-js'
 import {supabase} from "@lib/superbase";
+import { HomeIcon } from '@/app/components/icons/home'
 
-const navItems = {
+const navItems: Record<string, { name: string; icon?: ComponentType<{ className?: string }>; authOnly: boolean }> = {
   '/': {
     name: 'Home',
+    icon: HomeIcon,
     authOnly: false,
   },
   '/blog': {
@@ -22,6 +26,7 @@ const navItems = {
 }
 
 export function Navbar() {
+  const pathname = usePathname()
   const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
@@ -46,15 +51,21 @@ export function Navbar() {
           id="nav"
         >
           <div className="flex flex-row space-x-0 pr-10">
-            {Object.entries(navItems).map(([path, { name, authOnly }]) => {
+            {Object.entries(navItems).map(([path, { name, icon: Icon, authOnly }]) => {
               if (authOnly && !session) return null
+              const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path)
               return (
                 <Link
                   key={path}
                   href={path}
-                  className="transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1"
+                  className={`transition-all border rounded-sm flex items-center gap-1 relative  px-2 m-1.5 ${
+                    isActive
+                      ? 'border-transparent cursor-default'
+                      : 'border-transparent hover:bg-neutral-300/40 hover:border-neutral-300'
+                  }`}
                 >
-                 <span className="text-xs font-semibold tracking-wider text-neutral-800 dark:text-neutral-200">{name.toLocaleUpperCase()}</span>
+                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  <span className="text-xs font-semibold tracking-wider text-neutral-800 dark:text-neutral-200">{name.toLocaleUpperCase()}</span>
                 </Link>
               )
             })}
