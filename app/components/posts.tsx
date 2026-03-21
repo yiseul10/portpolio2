@@ -14,20 +14,24 @@ const PAGE_SIZE = 10
 interface BlogPostsProps {
   showFilter?: boolean
   showPagination?: boolean
+  fixedCategory?: 'study' | 'experience'
+  showCategoryFilter?: boolean
 }
 
 type FilterType = 'published' | 'draft'
-type CategoryType = 'all' | 'study' | 'experience'
+type CategoryType = 'all' | 'study' | 'experience' | 'diary'
 
 export function BlogPosts({
   showFilter = false,
   showPagination = false,
+  fixedCategory,
+  showCategoryFilter = false,
 }: BlogPostsProps) {
   const [posts, setPosts] = useState<any[]>([])
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<FilterType | null>(null)
-  const [category, setCategory] = useState<CategoryType>('experience')
+  const [category, setCategory] = useState<CategoryType>('all')
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -47,8 +51,13 @@ export function BlogPosts({
       query = query.eq('published', false)
     }
 
-    if (category !== 'all') {
-      query = query.eq('category', category)
+    if (fixedCategory) {
+      query = query.eq('category', fixedCategory)
+    } else if (showCategoryFilter) {
+      query = query.neq('category', 'experience')
+      if (category !== 'all') {
+        query = query.eq('category', category)
+      }
     }
 
     if (showPagination) {
@@ -69,7 +78,7 @@ export function BlogPosts({
     }
 
     setIsLoading(false)
-  }, [filter, page, category, showPagination])
+  }, [filter, page, fixedCategory, category, showCategoryFilter, showPagination])
 
   useEffect(() => {
     const init = async () => {
@@ -92,7 +101,7 @@ export function BlogPosts({
 
   useEffect(() => {
     fetchPosts(session)
-  }, [filter, page, category, fetchPosts])
+  }, [filter, page, fixedCategory, category, fetchPosts])
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
@@ -109,7 +118,7 @@ export function BlogPosts({
       {/* 카테고리 + 공개/비공개 필터 */}
       {showFilter && (
         <div className="flex items-center gap-2 mb-6 flex-wrap">
-          {(['all', 'study', 'experience'] as const).map((cat) => (
+          {showCategoryFilter && (['all', 'study', 'diary'] as const).map((cat) => (
             <button
               key={cat}
               className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors ${
@@ -119,12 +128,12 @@ export function BlogPosts({
               }`}
               onClick={() => { setCategory(cat); setPage(0) }}
             >
-              {cat === 'all' ? 'All' : cat === 'study' ? 'Study' : 'Experience'}
+              {cat === 'all' ? 'All' : cat === 'study' ? 'Study' : 'Diary'}
             </button>
           ))}
           {session && (
             <>
-              <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+              {showCategoryFilter && <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 mx-1" />}
               <button
                 className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors flex items-center gap-1.5 ${
                   filter === 'published'

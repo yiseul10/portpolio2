@@ -8,7 +8,10 @@ export function CubeCluster({ className }: { className?: string }) {
       strokeWidth="1"
       viewBox="0 0 160 120"
     >
-      {/* Top cube */}
+      {/* Top cube - filled faces */}
+      <path d="M60 30 L80 20 L100 30 L80 40 Z" fill="rgba(163,163,163,0.25)" /> {/* top face */}
+      <path d="M60 30 L80 40 L80 60 L60 50 Z" fill="rgba(163,163,163,0.25)" /> {/* left face */}
+      <path d="M80 40 L100 30 L100 50 L80 60 Z" fill="rgba(163,163,163,0.25)" /> {/* right face */}
       <path d="M80 20 L100 30 L100 50 L80 60 L60 50 L60 30 Z" />
       <path d="M80 60 L80 40 L100 30 M60 30 L80 40" />
       {/* Bottom-left cube */}

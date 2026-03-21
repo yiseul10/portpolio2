@@ -42,7 +42,7 @@ export default function EditPostPage() {
         published: z.boolean(),
         slug: z.string().min(1, "required"),
         tags: z.string().optional(),
-        category: z.enum(['study', 'experience']),
+        category: z.enum(['study', 'experience', 'diary']),
     })
 
     const form = useForm({
@@ -107,7 +107,7 @@ export default function EditPostPage() {
                 published: post.published,
                 slug: post.slug,
                 tags: post.tags ? post.tags.join(', ') : '',
-                category: post.category || 'study',
+                category: post.category || 'experience',
             })
 
             setExistingImage(post.image || '')
@@ -315,6 +315,7 @@ export default function EditPostPage() {
                                             >
                                                 <option value="study">Study</option>
                                                 <option value="experience">Experience</option>
+                                                <option value="diary">Diary</option>
                                             </select>
                                         </FormControl>
                                     </FormItem>

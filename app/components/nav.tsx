@@ -15,13 +15,17 @@ const navItems: Record<string, { name: string; icon?: ComponentType<{ className?
     icon: HomeIcon,
     authOnly: false,
   },
+  '/work': {
+    name: 'Work',
+    authOnly: false,
+  },
   '/blog': {
     name: 'Blog',
     authOnly: false,
   },
   '/resume': {
     name: 'Resume',
-    authOnly: true,
+    authOnly: false,
   },
 }
 
