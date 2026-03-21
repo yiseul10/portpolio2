@@ -17,6 +17,7 @@ interface BlogPostsProps {
 }
 
 type FilterType = 'published' | 'draft'
+type CategoryType = 'all' | 'study' | 'experience'
 
 export function BlogPosts({
   showFilter = false,
@@ -25,7 +26,8 @@ export function BlogPosts({
   const [posts, setPosts] = useState<any[]>([])
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<FilterType>('published')
+  const [filter, setFilter] = useState<FilterType | null>(null)
+  const [category, setCategory] = useState<CategoryType>('experience')
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -39,12 +41,14 @@ export function BlogPosts({
 
     if (!currentSession) {
       query = query.eq('published', true)
-    } else {
-      if (filter === 'published') {
-        query = query.eq('published', true)
-      } else {
-        query = query.eq('published', false)
-      }
+    } else if (filter === 'published') {
+      query = query.eq('published', true)
+    } else if (filter === 'draft') {
+      query = query.eq('published', false)
+    }
+
+    if (category !== 'all') {
+      query = query.eq('category', category)
     }
 
     if (showPagination) {
@@ -65,7 +69,7 @@ export function BlogPosts({
     }
 
     setIsLoading(false)
-  }, [filter, page, showPagination])
+  }, [filter, page, category, showPagination])
 
   useEffect(() => {
     const init = async () => {
@@ -88,7 +92,7 @@ export function BlogPosts({
 
   useEffect(() => {
     fetchPosts(session)
-  }, [filter, page, fetchPosts])
+  }, [filter, page, category, fetchPosts])
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
@@ -102,25 +106,49 @@ export function BlogPosts({
 
   return (
     <div>
-      {/* 필터 탭 */}
-      {showFilter && session && (
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant={filter === 'published' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => { setFilter('published'); setPage(0) }}
-          >
-            <Eye className="w-3.5 h-3.5 mr-1" />
-            공개
-          </Button>
-          <Button
-            variant={filter === 'draft' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => { setFilter('draft'); setPage(0) }}
-          >
-            <EyeClosed className="w-3.5 h-3.5 mr-1" />
-            비공개
-          </Button>
+      {/* 카테고리 + 공개/비공개 필터 */}
+      {showFilter && (
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          {(['all', 'study', 'experience'] as const).map((cat) => (
+            <button
+              key={cat}
+              className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors ${
+                category === cat
+                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
+                  : 'bg-[#efe4bb]/50 text-neutral-600 hover:bg-[#efe4bb] dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+              }`}
+              onClick={() => { setCategory(cat); setPage(0) }}
+            >
+              {cat === 'all' ? 'All' : cat === 'study' ? 'Study' : 'Experience'}
+            </button>
+          ))}
+          {session && (
+            <>
+              <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+              <button
+                className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  filter === 'published'
+                    ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
+                    : 'bg-[#efe4bb]/50 text-neutral-600 hover:bg-[#efe4bb] dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                }`}
+                onClick={() => { setFilter(filter === 'published' ? null : 'published'); setPage(0) }}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                공개
+              </button>
+              <button
+                className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  filter === 'draft'
+                    ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
+                    : 'bg-[#efe4bb]/50 text-neutral-600 hover:bg-[#efe4bb] dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                }`}
+                onClick={() => { setFilter(filter === 'draft' ? null : 'draft'); setPage(0) }}
+              >
+                <EyeClosed className="w-3.5 h-3.5" />
+                비공개
+              </button>
+            </>
+          )}
         </div>
       )}
 

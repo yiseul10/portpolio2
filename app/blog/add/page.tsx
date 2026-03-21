@@ -34,6 +34,7 @@ export default function Page() {
     published: z.boolean(),
     slug: z.string().min(1, "required"),
     tags: z.string().optional(),
+    category: z.enum(['study', 'experience']),
   })
 
   const form = useForm({
@@ -44,6 +45,7 @@ export default function Page() {
       published: false,
       slug: "",
       tags: "",
+      category: "study" as const,
     },
   })
 
@@ -81,6 +83,7 @@ export default function Page() {
       slug: values.slug,
       image: imageUrl,
       tags: tagsArray,
+      category: values.category,
     })
     if (error) {
       setSuccessMsg("")
@@ -182,6 +185,26 @@ export default function Page() {
                         </FormItem>
                     )}
                 />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>카테고리</FormLabel>
+                    <FormControl>
+                      <select
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        value={field.value}
+                        onChange={field.onChange}
+                      >
+                        <option value="study">Study</option>
+                        <option value="experience">Experience</option>
+                      </select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
