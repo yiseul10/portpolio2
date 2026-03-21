@@ -15,6 +15,7 @@ export function RecentPosts() {
         .from('posts')
         .select('*')
         .eq('published', true)
+        .eq('category', 'experience')
         .order('created_at', { ascending: false })
         .range(0, 1)
 
@@ -53,10 +54,10 @@ export function RecentPosts() {
 
       <div className="pb-4">
         <Link
-          href="/blog"
-          className="text-base font-serif font-semibold text-neutral-600 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors tracking-wide"
+          href="/work"
+          className="text-base font-serif font-semibold text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors tracking-wide"
         >
-          All posts →
+          All works →
         </Link>
       </div>
     </div>

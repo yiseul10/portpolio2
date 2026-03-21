@@ -18,7 +18,7 @@ export function PostItem({ post, session, showDescription = true, showBorder = t
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-bold leading-tight font-serif">
             <Link
-              href={`/blog/${post.slug}`}
+              href={`/${post.category === 'experience' ? 'work' : 'blog'}/${post.slug}`}
               className="post-title-hover"
             >
               {post.title}
@@ -46,7 +46,7 @@ export function PostItem({ post, session, showDescription = true, showBorder = t
           {post.category && (
             <>
               <span className="mx-1">·</span>
-              <span>{post.category === 'experience' ? 'Experience' : 'Study'}</span>
+              <span>{post.category === 'experience' ? 'Experience' : post.category === 'diary' ? 'Diary' : 'Study'}</span>
             </>
           )}
           {post.tags && post.tags.length > 0 && (

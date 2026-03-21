@@ -1,6 +1,7 @@
 import { Mail, Phone, Linkedin, Globe, FileText } from 'lucide-react'
+import type { Session } from '@supabase/supabase-js'
 
-export function ResumeTemplate({ data }: { data: any }) {
+export function  ResumeTemplate({ data, session }: { data: any; session?: Session | null }) {
   const profile = data?.profile || {}
   const summary = data?.summary || ''
   const keywords: string[] = Array.isArray(data?.keywords) ? data.keywords : []
@@ -52,10 +53,14 @@ export function ResumeTemplate({ data }: { data: any }) {
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm font-medium text-neutral-800 ">
                 {profile.email && (
                   <span className="inline-flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5" /> {profile.email}
+                    <Mail className="w-3.5 h-3.5" />
+                    <span className="hidden print:inline">{profile.email}</span>
+                    <a href={`mailto:${profile.email}`} className="print:hidden underline hover:text-neutral-800 dark:hover:text-neutral-200">
+                      이메일
+                    </a>
                   </span>
                 )}
-                {profile.phone && (
+                {session && profile.phone && (
                   <span className="inline-flex items-center gap-1">
                     <Phone className="w-3.5 h-3.5" /> {profile.phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1\u00B7$2\u00B7$3')}
                   </span>
@@ -78,8 +83,8 @@ export function ResumeTemplate({ data }: { data: any }) {
                 )}
               </div>
             </div>
-            {/* 증명사진 */}
-            {profile.photo && (
+            {/* 증명사진 - 로그인 시에만 */}
+            {session && profile.photo && (
               <div className="shrink-0 ml-6">
                 <img
                   src={profile.photo}
@@ -106,7 +111,7 @@ export function ResumeTemplate({ data }: { data: any }) {
                   key={i}
                   className="text-xs px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 print:border print:border-neutral-300 print:bg-transparent"
                 >
-                  {kw}
+                  #{kw}
                 </span>
               ))}
             </div>
@@ -212,8 +217,8 @@ export function ResumeTemplate({ data }: { data: any }) {
 
 
 
-      {/* 학력 */}
-      {education.length > 0 && (
+      {/* 학력 - 로그인 시에만 */}
+      {session && education.length > 0 && (
         <section className="mb-12">
           <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
             {titles.education}
@@ -238,8 +243,8 @@ export function ResumeTemplate({ data }: { data: any }) {
         </section>
       )}
 
-      {/* 자격증 / 기타 */}
-      {certifications.length > 0 && (
+      {/* 자격증 / 기타 - 로그인 시에만 */}
+      {session && certifications.length > 0 && (
         <section className="mb-12">
           <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
             {titles.certifications}
@@ -261,8 +266,8 @@ export function ResumeTemplate({ data }: { data: any }) {
         </section>
       )}
 
-      {/* 커스텀 섹션들 */}
-      {customSections.map((section: any, i: number) => {
+      {/* 커스텀 섹션들 - 로그인 시에만 */}
+      {session && customSections.map((section: any, i: number) => {
         const items = Array.isArray(section.items) ? section.items : []
         const layout = section.layout || 'simple'
         if (!section.title && items.length === 0) return null

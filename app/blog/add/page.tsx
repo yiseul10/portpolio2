@@ -34,7 +34,7 @@ export default function Page() {
     published: z.boolean(),
     slug: z.string().min(1, "required"),
     tags: z.string().optional(),
-    category: z.enum(['study', 'experience']),
+    category: z.enum(['study', 'experience', 'diary']),
   })
 
   const form = useForm({
@@ -45,7 +45,7 @@ export default function Page() {
       published: false,
       slug: "",
       tags: "",
-      category: "study" as const,
+      category: "experience" as const,
     },
   })
 
@@ -200,6 +200,7 @@ export default function Page() {
                       >
                         <option value="study">Study</option>
                         <option value="experience">Experience</option>
+                        <option value="diary">Diary</option>
                       </select>
                     </FormControl>
                   </FormItem>
