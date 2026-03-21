@@ -2,11 +2,27 @@ import "@styles/globals.css";
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { Newsreader, Manrope } from 'next/font/google'
 import { Navbar } from './components/nav'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import Footer from './components/footer'
 import { Toaster } from "sonner";
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-newsreader',
+  display: 'swap',
+})
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-manrope',
+  display: 'swap',
+})
 
  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -49,9 +65,11 @@ export default function RootLayout({
     <html
       lang="ko"
       className={cx(
-        'text-black bg-white dark:text-white dark:bg-black',
+        'text-black   dark:text-white dark:bg-black',
         GeistSans.variable,
-        GeistMono.variable
+        GeistMono.variable,
+        newsreader.variable,
+        manrope.variable
       )}
     >
     <body className="antialiased mx-4 mt-0 lg:mx-auto min-h-screen flex flex-col max-w-2xl has-[.editor-page]:max-w-4xl">

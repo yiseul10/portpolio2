@@ -118,8 +118,57 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        /*@apply bg-background text-foreground;*/
+        @apply bg-[#efe4bb]/10 text-foreground
     }
+}
+
+/* === Typography System (DESIGN.md) === */
+/* Manrope: body, nav, dates, categories */
+/* Newsreader: headlines, featured title, brand */
+body {
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-newsreader), 'Georgia', serif;
+}
+
+/* === Hero Gradient (Lavender-Purple arc per DESIGN.md) === */
+.hero-gradient {
+  background: linear-gradient(135deg, #732EE4, #a855f7, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .hero-gradient {
+  background: linear-gradient(135deg, #DECCFF, #a78bfa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === Glassmorphism Featured Card === */
+/* #f9f8f6*/
+
+/* === Post Title Hover (lavender gradient highlight 100%→20%) === */
+.post-title-hover {
+  background-image: linear-gradient(to right, #e0d4f5, rgba(224, 212, 245, 0.2));
+  background-size: 0% 40%;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  text-decoration: none;
+  display: inline;
+  transition: background-size 0.4s ease;
+}
+
+.post-title-hover:hover {
+  background-size: 100% 40%;
+}
+
+.dark .post-title-hover {
+  background-image: linear-gradient(to right, rgba(115, 46, 228, 0.3), rgba(115, 46, 228, 0.05));
 }
 
 /* === MDX Prose Styles === */
@@ -176,6 +225,20 @@
   color: #6b7280;
 }
 
+/* === Sugar-high Syntax Highlighting Tokens === */
+:root {
+  --sh-class: #e0aaff;        /* 클래스명 - 연보라 */
+  --sh-identifier: #cdd6f4;   /* 식별자 - 연회색 */
+  --sh-keyword: #cba6f7;      /* 키워드 (import, const, function) - 라벤더 */
+  --sh-string: #a6e3a1;       /* 문자열 - 소프트 그린 */
+  --sh-property: #89b4fa;     /* 프로퍼티 - 소프트 블루 */
+  --sh-entity: #94e2d5;       /* 엔티티 - 틸 */
+  --sh-jsxliterals: #f9e2af;  /* JSX 리터럴 - 소프트 옐로 */
+  --sh-sign: #89ddff;         /* 구두점/기호 - 시안 */
+  --sh-comment: #6c7086;      /* 주석 - 뮤트 그레이 */
+  --sh-number: #fab387;       /* 숫자 - 피치 */
+}
+
 .prose pre {
   @apply rounded-lg overflow-x-auto text-sm;
   background: #1e1e2e;
@@ -212,15 +275,15 @@
 }
 
 .prose h1 {
-  @apply text-4xl font-medium tracking-tight mt-6 mb-2;
+  @apply text-4xl font-medium tracking-tight mt-12 mb-4;
 }
 
 .prose h2 {
-  @apply text-xl font-medium tracking-tight mt-6 mb-2;
+  @apply text-xl font-medium tracking-tight mt-10 mb-3;
 }
 
 .prose h3 {
-  @apply text-xl font-medium tracking-tight mt-6 mb-2;
+  @apply text-xl font-medium tracking-tight mt-8 mb-3;
 }
 
 .prose h4 {

@@ -6,13 +6,18 @@ import rehypeRaw from 'rehype-raw'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
-/** 연속 빈 줄(3개 이상 개행)을 <br/> 스페이서로 변환하여 의도한 간격 유지 */
+/** 빈 줄 보존: &nbsp; 스페이서와 연속 빈 줄을 시각적 간격으로 변환 */
 function preserveSpacing(source: string): string {
-  return source.replace(/\n{3,}/g, (match) => {
+  let result = source
+  // 에디터에서 보존한 &nbsp; 줄 → 시각적 빈 줄로 변환
+  result = result.replace(/\n\n&nbsp;\n\n/g, '\n\n<div class="spacer" style="height:1.5em"></div>\n\n')
+  // 연속 빈 줄(3개 이상 개행)도 처리
+  result = result.replace(/\n{3,}/g, (match) => {
     const extraBreaks = match.length - 2
-    const spacers = Array(extraBreaks).fill('<br/>').join('\n')
+    const spacers = Array(extraBreaks).fill('<div class="spacer" style="height:1.5em"></div>').join('\n')
     return '\n\n' + spacers + '\n\n'
   })
+  return result
 }
 
 function Table({ data }) {
@@ -97,11 +102,13 @@ const components = {
     )
   },
   code: ({ children, className, ...props }) => {
-    const isInline = !className
-    if (isInline) {
+    const content = String(children)
+    // className이 있거나 (language 지정), 줄바꿈이 포함되면 코드 블록
+    const isCodeBlock = !!className || content.includes('\n')
+    if (!isCodeBlock) {
       return <code className="inline-code" {...props}>{children}</code>
     }
-    const codeHTML = highlight(String(children).replace(/\n$/, ''))
+    const codeHTML = highlight(content.replace(/\n$/, ''))
     return <code className={className} dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />
   },
 }

@@ -118,7 +118,7 @@ export default async function Blog({ params }) {
         <PostGuard published={post.published}>
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                    <h1 className="title font-semibold text-2xl tracking-tighter">
+                    <h1 className="title font-semibold text-2xl tracking-tighter font-serif">
                         {post.title}
                     </h1>
                     <div className="flex justify-between items-center mt-2 mb-8 text-sm">
