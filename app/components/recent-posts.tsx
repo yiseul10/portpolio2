@@ -1,31 +1,18 @@
-'use client'
-
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { supabase } from '@lib/superbase'
 import { CubeCluster } from '@/app/components/icons/cube-cluster'
 import { PostItem } from '@/app/components/post-item'
 
-export function RecentPosts() {
-  const [posts, setPosts] = useState<any[]>([])
+export async function RecentPosts() {
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('published', true)
+    .eq('category', 'experience')
+    .order('created_at', { ascending: false })
+    .range(0, 1)
 
-  useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('published', true)
-        .eq('category', 'experience')
-        .order('created_at', { ascending: false })
-        .range(0, 1)
-
-      if (data) setPosts(data)
-    }
-    fetch()
-  }, [])
-
-  if (posts.length === 0) return null
-
+  if (!posts || posts.length === 0) return null
 
   return (
     <div className="w-full flex flex-col gap-8">

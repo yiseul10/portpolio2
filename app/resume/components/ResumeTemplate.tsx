@@ -1,7 +1,6 @@
 import { Mail, Phone, Linkedin, Globe, FileText } from 'lucide-react'
-import type { Session } from '@supabase/supabase-js'
 
-export function  ResumeTemplate({ data, session }: { data: any; session?: Session | null }) {
+export function ResumeTemplate({ data, authenticated = false }: { data: any; authenticated?: boolean }) {
   const profile = data?.profile || {}
   const summary = data?.summary || ''
   const keywords: string[] = Array.isArray(data?.keywords) ? data.keywords : []
@@ -60,7 +59,7 @@ export function  ResumeTemplate({ data, session }: { data: any; session?: Sessio
                     </a>
                   </span>
                 )}
-                {session && profile.phone && (
+                {authenticated && profile.phone && (
                   <span className="inline-flex items-center gap-1">
                     <Phone className="w-3.5 h-3.5" /> {profile.phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1\u00B7$2\u00B7$3')}
                   </span>
@@ -84,7 +83,7 @@ export function  ResumeTemplate({ data, session }: { data: any; session?: Sessio
               </div>
             </div>
             {/* 증명사진 - 로그인 시에만 */}
-            {session && profile.photo && (
+            {authenticated && profile.photo && (
               <div className="shrink-0 ml-6">
                 <img
                   src={profile.photo}
@@ -218,7 +217,7 @@ export function  ResumeTemplate({ data, session }: { data: any; session?: Sessio
 
 
       {/* 학력 - 로그인 시에만 */}
-      {session && education.length > 0 && (
+      {authenticated && education.length > 0 && (
         <section className="mb-12">
           <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
             {titles.education}
@@ -244,7 +243,7 @@ export function  ResumeTemplate({ data, session }: { data: any; session?: Sessio
       )}
 
       {/* 자격증 / 기타 - 로그인 시에만 */}
-      {session && certifications.length > 0 && (
+      {authenticated && certifications.length > 0 && (
         <section className="mb-12">
           <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
             {titles.certifications}
@@ -267,7 +266,7 @@ export function  ResumeTemplate({ data, session }: { data: any; session?: Sessio
       )}
 
       {/* 커스텀 섹션들 - 로그인 시에만 */}
-      {session && customSections.map((section: any, i: number) => {
+      {authenticated && customSections.map((section: any, i: number) => {
         const items = Array.isArray(section.items) ? section.items : []
         const layout = section.layout || 'simple'
         if (!section.title && items.length === 0) return null

@@ -1,33 +1,15 @@
 'use client'
 
-import Link from 'next/link'
 import { NetworkGraph } from '@/app/components/icons/network-graph'
-import {useEffect, useState} from "react";
-import {LinkedInIcon} from "@/app/components/icons/linkedin";
-import {Mail} from "lucide-react";
+import { useState } from 'react'
+import { LinkedInIcon } from '@/app/components/icons/linkedin'
 
-export function FeaturedPost() {
+export function FeaturedPost({ keywords = [] }: { keywords?: string[] }) {
     const [mousePosition, setMousePosition] = useState({
         x: 0,
         y: 0,
     });
     const [isHovering, setIsHovering] = useState(false);
-    const [keywords, setKeywords] = useState<string[]>([]);
-
-    useEffect(() => {
-        const fetchKeywords = async () => {
-            try {
-                const res = await fetch('/api/resume')
-                const { data } = await res.json()
-                if (data?.keywords) {
-                    setKeywords(data.keywords)
-                }
-            } catch (e) {
-                console.error('Keywords fetch error:', e)
-            }
-        }
-        fetchKeywords()
-    }, []);
 
     const handleMouseMove = (
         e: React.MouseEvent<HTMLDivElement>,
@@ -79,11 +61,6 @@ export function FeaturedPost() {
             <br />
             문제의 본질을 빠르게 파악하고 비즈니스 가치로 이어지는 솔루션을 지향합니다.
           </p>
-          {/*<span className={`text-[14px] leading-relaxed font-serif font-medium transition-colors duration-300 ${isHovering ? 'text-gray-700 dark:text-neutral-300' : 'text-gray-400 dark:text-neutral-500'}`}>*/}
-          {/*  Building user-centered, scalable interfaces that drive business value.*/}
-          {/*</span>*/}
-
-
 
             {/* keywords */}
             {keywords.length > 0 && (
@@ -110,16 +87,6 @@ export function FeaturedPost() {
             >
                 <LinkedInIcon className="w-5 h-5" />
             </a>
-
-                {/*<a href="mailto:yiseul10@gmail.com"*/}
-                {/*   className=" text-gray-800 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"*/}
-                {/*   >*/}
-                {/*    <div className="flex items-center gap-1 h-[21px] px-1 rounded-[4px] bg-orange-300 hover:bg-orange-600">*/}
-                {/*    <Mail className="w-4 h-4 stroke-2 text-white"/>*/}
-                {/*    <span className="text-white text-xs font-bold">MAIL ME</span>*/}
-                {/*    </div>*/}
-                {/*  */}
-                {/*</a>*/}
             </div>
         </div>
         <div className="absolute right-1 top-0 bottom-0 w-[40%] md:w-[30%] flex justify-end">
