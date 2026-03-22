@@ -13,18 +13,34 @@ export default function ResumePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [resumeData, setResumeData] = useState<any>(defaultResumeData)
 
-  const fetchResume = async () => {
+  const fetchResume = async (currentSession: Session | null) => {
     try {
-      const res = await fetch('/api/resume')
-      const { data: raw } = await res.json()
+      const { data: resume, error } = await supabase
+        .from('resume')
+        .select('data')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
 
-      if (raw) {
-        setResumeData({
-          ...defaultResumeData,
-          ...raw,
-          profile: { ...defaultResumeData.profile, ...(raw.profile || {}) },
-        })
+      if (error || !resume?.data) return
+
+      const raw = resume.data
+
+      // 비인증 사용자: 민감정보 제거
+      if (!currentSession) {
+        if (raw.profile) {
+          delete raw.profile.phone
+          delete raw.profile.photo
+        }
+        delete raw.education
+        delete raw.customSections
       }
+
+      setResumeData({
+        ...defaultResumeData,
+        ...raw,
+        profile: { ...defaultResumeData.profile, ...(raw.profile || {}) },
+      })
     } catch (e) {
       console.error('Resume fetch error:', e)
     }
@@ -34,7 +50,7 @@ export default function ResumePage() {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
-      await fetchResume()
+      await fetchResume(session)
       setIsLoading(false)
     }
 
@@ -42,7 +58,7 @@ export default function ResumePage() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      fetchResume() // 로그인/로그아웃 시 다시 fetch (권한별 데이터 변경)
+      fetchResume(session) // 로그인/로그아웃 시 다시 fetch (권한별 데이터 변경)
     })
 
     return () => { authListener?.subscription.unsubscribe() }

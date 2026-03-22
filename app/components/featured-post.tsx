@@ -39,6 +39,17 @@ export function FeaturedPost() {
         });
     };
 
+    const handleTouchMove = (
+        e: React.TouchEvent<HTMLDivElement>,
+    ) => {
+        const touch = e.touches[0];
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMousePosition({
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top,
+        });
+    };
+
   return (
     <div className="w-full relative">
       <div className="absolute right-0 top-0 bottom-0 w-[40%] md:w-[30%] flex items-center justify-end pr-6">
@@ -50,6 +61,9 @@ export function FeaturedPost() {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      onTouchStart={() => setIsHovering(true)}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={() => setIsHovering(false)}
     >
       <div className="flex justify-between items-start relative z-10">
         <div className="w-[60%] md:w-[70%]">
@@ -58,7 +72,7 @@ export function FeaturedPost() {
               Kim Yiseul
             </a>
           </h2>
-            <span className="font-serif text-base text-neutral-700 mt-2">Frontend engineer · 4+ years · seoul</span>
+            <span className={`font-serif text-base transition-colors duration-300  mt-2 ${isHovering ? 'text-neutral-800' : 'text-neutral-600'}`}>Frontend engineer · 4+ years · seoul</span>
 
           <p className={`my-1 leading-relaxed text-sm transition-colors duration-300 ${isHovering ? 'text-gray-950 dark:text-neutral-100' : 'text-gray-800 dark:text-neutral-300'}`}>
             사용자 중심의 확장 가능한 UI를 만듭니다.
@@ -73,7 +87,7 @@ export function FeaturedPost() {
 
             {/* keywords */}
             {keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3 ">
+              <div className="hidden sm:block flex flex-wrap gap-1.5 mt-3 ">
                 {keywords.map((kw, i) => (
                   <span
                     key={i}

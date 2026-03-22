@@ -74,7 +74,7 @@ export function Navbar() {
               )
             })}
           </div>
-          <div className="flex justify-end">
+          <div className="hidden md:flex justify-end">
             {session ? (
               <Button variant="link" onClick={() => supabase.auth.signOut()}>
                 <span className="text-xs">Logout</span>

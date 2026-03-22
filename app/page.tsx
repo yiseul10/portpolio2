@@ -7,7 +7,7 @@ export default function Page() {
       {/* Featured / About Card */}
       <FeaturedPost />
       {/* Post List */}
-      <div className="w-full mt-8">
+      <div className="w-full mt-8 px-1">
         <RecentPosts />
       </div>
     </section>
