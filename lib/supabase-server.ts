@@ -11,6 +11,16 @@ export async function createServerSupabase() {
         getAll() {
           return cookieStore.getAll()
         },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // Server Component에서 호출 시 무시 (읽기 전용)
+            // Middleware에서 갱신 처리
+          }
+        },
       },
     }
   )
