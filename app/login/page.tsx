@@ -18,7 +18,7 @@ export default function Page() {
     }
 
     const { error } = await supabase.auth.signInWithOtp({ email,  options: {
-        emailRedirectTo: `${window.location.origin}/blog`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/blog`,
       }, });
 
     if (error) {
