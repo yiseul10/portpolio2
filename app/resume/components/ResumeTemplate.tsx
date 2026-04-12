@@ -154,7 +154,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
       {/* 경력 */}
       {experience.length > 0 && (
         <section className="mb-8 print:mb-10">
-          <h2 className="text-lg font-semibold mb-3 print:mb-2 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.experience}
           </h2>
           <div className="">
@@ -225,7 +225,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
       {/* 학력 - 로그인 시에만 */}
       {authenticated && education.length > 0 && (
         <section className="mb-8 print:mb-4">
-          <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.education}
           </h2>
           <div className="space-y-3">
@@ -251,7 +251,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
       {/* 자격증 / 기타 - 로그인 시에만 */}
       {authenticated && certifications.length > 0 && (
         <section className="mb-8 print:mb-4">
-          <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.certifications}
           </h2>
           <div className="space-y-3">
@@ -278,7 +278,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
         if (!section.title && items.length === 0) return null
         return (
           <section key={i} className="mb-8">
-            <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+            <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
               {section.title || '(제목 없음)'}
             </h2>
             <div className="space-y-3">

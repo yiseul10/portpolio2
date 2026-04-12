@@ -6,6 +6,8 @@ interface CoverLetterTemplateProps {
   profile?: Profile
 }
 
+const SECTION_LABEL = 'text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 pb-1 mb-3'
+
 export function CoverLetterTemplate({ data, profile }: CoverLetterTemplateProps) {
   if (!data) return null
 
@@ -20,20 +22,18 @@ export function CoverLetterTemplate({ data, profile }: CoverLetterTemplateProps)
         <section
           key={i}
           className={
-            i === 0
-              ? 'mb-9 pb-9 border-b border-neutral-200'   // 첫 섹션 아래 구분선
-              : i === last
-              ? 'mb-6 mt-9 pt-9 border-t border-neutral-200'  // 마지막 섹션 위 구분선
-              : 'mb-6'
+            i === 0 ? 'mb-9'
+            : i === last ? 'mb-6 mt-9'
+            : 'mb-6'
           }
         >
           {section.title && (
-            <h2 className="text-[14px] -mb-2 tracking-[0.25rem] font-black text-neutral-300 print:text-sm">
+            <h2 className={SECTION_LABEL}>
               {section.title}
             </h2>
           )}
           <div
-            className="cl-content text-sm leading-relaxed text-neutral-700"
+            className="cl-content text-base leading-relaxed text-neutral-700"
             dangerouslySetInnerHTML={{ __html: section.content }}
           />
         </section>
