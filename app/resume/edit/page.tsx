@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { Suspense, useEffect, useState, useRef, useMemo } from 'react'
 import { useForm, FormProvider, useFieldArray, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -673,6 +673,18 @@ function PhotoUpload() {
 
 // ─── Main Edit Page ─────────────────────────────────────
 export default function ResumeEditPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <ResumeEditContent />
+    </Suspense>
+  )
+}
+
+function ResumeEditContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
