@@ -3,6 +3,7 @@ import { Mail, Phone, Linkedin, Globe, FileText } from 'lucide-react'
 export function ResumeTemplate({ data, authenticated = false }: { data: any; authenticated?: boolean }) {
   const profile = data?.profile || {}
   const summary = data?.summary || ''
+  const summaryHeadline = data?.summaryHeadline || ''
   const keywords: string[] = Array.isArray(data?.keywords) ? data.keywords : []
   const experience = Array.isArray(data?.experience) ? data.experience : []
   const skills = Array.isArray(data?.skills) ? data.skills : []
@@ -20,7 +21,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
   }
 
   const hasProfile = profile.name || profile.title
-  const hasContent = hasProfile || summary || experience.length > 0 || skills.length > 0 || education.length > 0 || certifications.length > 0 || customSections.length > 0
+  const hasContent = hasProfile || summary || summaryHeadline || experience.length > 0 || skills.length > 0 || education.length > 0 || certifications.length > 0 || customSections.length > 0
 
   if (!hasContent) {
     return (
@@ -36,7 +37,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
     <div className="resume-content">
       {/* 헤더 */}
       {hasProfile && (
-        <header className="mb-12 border-b-2 border-neutral-700  pb-1">
+        <header className="mb-6 print:mb-6 border-b-2 border-neutral-700 pb-1">
           <div className="flex justify-between items-start">
             <div className="flex-1">
               {profile.name && (
@@ -88,7 +89,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
                 <img
                   src={profile.photo}
                   alt="Profile"
-                  className="w-28 h-28 object-cover rounded-lg  print:w-28 print:h-28"
+                  className="w-28 h-28 object-cover rounded-lg  print:w-24 print:h-24"
                 />
               </div>
             )}
@@ -97,9 +98,14 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
       )}
 
       {/* 소개 */}
-      {summary && (
-        <section className="mb-4">
-          <span className="text-base  leading-relaxed text-neutral-700  whitespace-pre-line">
+      {(summaryHeadline || summary) && (
+        <section className="mb-2 print:mb-1">
+          {summaryHeadline && (
+            <h2 className="text-2xl font-bold tracking-tight mb-2 print:text-xl">
+              {summaryHeadline}
+            </h2>
+          )}
+          <span className="text-base leading-relaxed text-neutral-700 whitespace-pre-line">
             {summary}
           </span>
           {/* 해시태그 키워드 */}
@@ -120,7 +126,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
 
       {/* 기술 스택 */}
       {skills.length > 0 && (
-          <section className="mb-14">
+          <section className="mb-8 print:mb-8">
             <div className="w-full gap-5 text-sm">
               {skills.map((group: any, i: number) => (
                   <div key={i}>
@@ -147,28 +153,28 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
 
       {/* 경력 */}
       {experience.length > 0 && (
-        <section className="mb-14">
-          <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+        <section className="mb-8 print:mb-10">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.experience}
           </h2>
           <div className="">
             {experience.map((exp: any, i: number) => (
-              <div key={i}>
+              <div key={i} className="experience-item">
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-black">{exp.company}</h3>
-                  <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
+                  <span className="text-xs text-neutral-500 shrink-0 ml-4">
                     {exp.startDate} - {exp.endDate}
                   </span>
                 </div>
                 {exp.role && (
-                  <p className="text-sm text-neutral-500 print:text-[14px]">{exp.role}</p>
+                  <p className="text-sm text-neutral-500">{exp.role}</p>
                 )}
                 {exp.subtitle && (
-                  <p className="text-sm text-neutral-500 font-semibold italic mt-2 mb-3 print:text-[14px]">{exp.subtitle}</p>
+                  <p className="text-sm text-neutral-500 font-semibold italic mt-2 mb-3">{exp.subtitle}</p>
                 )}
                 {!exp.subtitle && exp.role && <div className="mb-2" />}
                 {Array.isArray(exp.descriptions) && exp.descriptions.length > 0 && (
-                  <ul className="text-sm text-neutral-700 mt-4 print:text-base">
+                  <ul className="text-sm text-neutral-700 mt-4">
                     {exp.descriptions.map((desc: any, j: number) => {
                       const item = typeof desc === 'string'
                         ? { text: desc, level: 1, bold: false, italic: false }
@@ -218,8 +224,8 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
 
       {/* 학력 - 로그인 시에만 */}
       {authenticated && education.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+        <section className="mb-8 print:mb-4">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.education}
           </h2>
           <div className="space-y-3">
@@ -228,7 +234,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-medium text-sm">{edu.school}</h3>
                   {(edu.startDate || edu.endDate) && (
-                    <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
+                    <span className="text-xs text-neutral-500 shrink-0 ml-4">
                       {edu.startDate} - {edu.endDate}
                     </span>
                   )}
@@ -244,8 +250,8 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
 
       {/* 자격증 / 기타 - 로그인 시에만 */}
       {authenticated && certifications.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+        <section className="mb-8 print:mb-4">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
             {titles.certifications}
           </h2>
           <div className="space-y-3">
@@ -272,7 +278,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
         if (!section.title && items.length === 0) return null
         return (
           <section key={i} className="mb-8">
-            <h2 className="text-lg font-semibold mb-3 border-b border-neutral-200 dark:border-neutral-600 pb-1">
+            <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
               {section.title || '(제목 없음)'}
             </h2>
             <div className="space-y-3">

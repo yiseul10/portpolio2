@@ -71,6 +71,7 @@ export const resumeSchema = z.object({
     photo: '',
   }),
   summary: z.string().default(''),
+  summaryHeadline: z.string().default(''),
   keywords: z.array(z.string()).default([]), // 해시태그 키워드
   experience: z.array(experienceItemSchema).default([]),
   skills: z.array(skillGroupSchema).default([]),
@@ -119,6 +120,7 @@ export const defaultResumeData: ResumeData = {
     photo: '',
   },
   summary: '',
+  summaryHeadline: '',
   keywords: [],
   experience: [],
   skills: [],

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { Suspense, useEffect, useState, useRef, useMemo } from 'react'
 import { useForm, FormProvider, useFieldArray, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -44,16 +44,27 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@lib/superbase'
 import { toast } from 'sonner'
-import { revalidateResume } from '@/app/resume/actions'
+import { updateVersion, createVersion } from '@/app/resume/actions'
+import { z } from 'zod'
 import {
   resumeSchema,
   defaultResumeData,
   type ResumeData,
 } from '@lib/types/resume'
+import { coverLetterSchema, defaultCoverLetterData } from '@lib/types/cover-letter'
+import { CoverLetterSection } from './components/CoverLetterSection'
 import type { Session } from '@supabase/supabase-js'
+
+// 편집 폼 스키마: 레쥬메 + 커버레터 + 버전 메타
+const editFormSchema = resumeSchema.extend({
+  cover_letter: coverLetterSchema.nullable().default(null),
+  _versionName: z.string().default(''),
+  _versionMemo: z.string().default(''),
+})
+type EditFormData = z.infer<typeof editFormSchema>
 
 // ─── Descriptions List ──────────────────────────────────
 // 3단계 × 불렛 on/off = 6 상태
@@ -552,7 +563,7 @@ function SectionTitleInput({ name }: { name: string }) {
       name={name as any}
       render={({ field }) => (
         <Input
-          className="text-base font-semibold border-none p-0 h-auto focus-visible:ring-0 w-auto max-w-[200px]"
+          className="text-base font-semibold border-none p-0 h-auto focus-visible:ring-0 w-full"
           {...field}
         />
       )}
@@ -662,15 +673,54 @@ function PhotoUpload() {
 
 // ─── Main Edit Page ─────────────────────────────────────
 export default function ResumeEditPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <ResumeEditContent />
+    </Suspense>
+  )
+}
+
+// 구버전 cover_letter 포맷(named fields) → 새 sections 배열로 마이그레이션
+function migrateCoverLetter(raw: any) {
+  if (!raw) return null
+  // 이미 새 포맷이면 그대로
+  if (Array.isArray(raw.sections)) {
+    return { sections: raw.sections.map((s: any) => ({ title: s.title || '', content: s.content || '' })) }
+  }
+  // 구버전: named fields → sections 배열로 변환
+  const titles = raw.sectionTitles || {}
+  const sections = [
+    { title: titles.greeting || '인사말', content: raw.greeting || '' },
+    { title: titles.motivation || '지원동기', content: raw.motivation || '' },
+    { title: titles.experience || '관련 경험', content: raw.experience || '' },
+    { title: titles.strengths || '강점', content: raw.strengths || '' },
+    { title: titles.closing || '마무리', content: raw.closing || '' },
+    ...(raw.customSections || []).map((s: any) => ({ title: s.title || '', content: s.content || '' })),
+  ]
+  return { sections }
+}
+
+function ResumeEditContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [resumeId, setResumeId] = useState<string | null>(null)
 
-  const form = useForm<ResumeData>({
-    resolver: zodResolver(resumeSchema) as any,
-    defaultValues: defaultResumeData,
+  const form = useForm<EditFormData>({
+    resolver: zodResolver(editFormSchema) as any,
+    defaultValues: {
+      ...defaultResumeData,
+      cover_letter: null,
+      _versionName: '',
+      _versionMemo: '',
+    },
   })
 
   useEffect(() => {
@@ -688,14 +738,21 @@ export default function ResumeEditPage() {
       if (!session) { setSession(null); setIsLoading(false); router.push('/login'); return }
       setSession(session)
 
-      const { data: resume, error } = await supabase
-        .from('resume').select('*').order('updated_at', { ascending: false }).limit(1).single()
+      // resume_versions에서 로드 (쿼리 파라미터 v=<id> 또는 활성 버전)
+      const versionId = searchParams.get('v')
+      let versionQuery = supabase.from('resume_versions').select('*')
+      if (versionId) {
+        versionQuery = versionQuery.eq('id', versionId)
+      } else {
+        versionQuery = versionQuery.eq('is_active', true)
+      }
+      const { data: version, error } = await versionQuery.single()
 
-      if (error) console.error('Resume fetch error:', error)
+      if (error) console.error('Version fetch error:', error)
 
-      if (resume) {
-        setResumeId(resume.id)
-        const raw = resume.data || {}
+      if (version) {
+        setResumeId(version.id)
+        const raw = version.resume_data || {}
         const migratedExperience = (raw.experience || []).map((exp: any) => ({
           ...exp,
           subtitle: exp.subtitle || '',
@@ -711,7 +768,7 @@ export default function ResumeEditPage() {
           startDate: c.startDate || '',
           endDate: c.endDate || '',
         }))
-        const merged = {
+        const merged: EditFormData = {
           ...defaultResumeData,
           ...raw,
           profile: { ...defaultResumeData.profile, ...(raw.profile || {}) },
@@ -727,6 +784,9 @@ export default function ResumeEditPage() {
               subtitle: item.subtitle || '',
             })),
           })),
+          cover_letter: migrateCoverLetter(version.cover_letter),
+          _versionName: version.name || '',
+          _versionMemo: version.memo || '',
         }
         form.reset(merged)
       }
@@ -737,11 +797,13 @@ export default function ResumeEditPage() {
     }
   }
 
-  const onSubmit = async (values: ResumeData) => {
+  const onSubmit = async (values: EditFormData) => {
     setIsSaving(true)
-    const cleanedValues = {
-      ...values,
-      experience: values.experience.map((exp) => ({
+    const { cover_letter, _versionName, _versionMemo, ...resumeData } = values
+
+    const cleanedResumeData = {
+      ...resumeData,
+      experience: resumeData.experience.map((exp) => ({
         ...exp,
         descriptions: exp.descriptions.filter(
           (d: any) => (typeof d === 'string' ? d.trim() !== '' : d.text?.trim() !== '')
@@ -749,17 +811,31 @@ export default function ResumeEditPage() {
       })),
     }
 
-    const query = resumeId
-      ? supabase.from('resume').update({ data: cleanedValues, updated_at: new Date().toISOString() }).eq('id', resumeId)
-      : supabase.from('resume').upsert({ data: cleanedValues, updated_at: new Date().toISOString() })
+    const payload = {
+      name: _versionName || '이름 없는 버전',
+      memo: _versionMemo,
+      resume_data: cleanedResumeData,
+      cover_letter: cover_letter,
+    }
 
-    const { error } = await query
-    if (error) {
-      toast.error('저장 실패: ' + error.message)
+    let result
+    if (resumeId) {
+      result = await updateVersion(resumeId, payload)
     } else {
-      toast.success('이력서가 저장되었습니다.')
-      await revalidateResume()
-      setTimeout(() => { router.push('/resume'); router.refresh() }, 1000)
+      result = await createVersion(payload)
+      if (result.data) setResumeId(result.data.id)
+    }
+
+    if (result.error) {
+      toast.error('저장 실패: ' + result.error.message)
+    } else {
+      setIsSaved(true)
+      toast.success('저장되었습니다.')
+      setTimeout(() => {
+        setIsSaved(false)
+        router.push('/resume')
+        router.refresh()
+      }, 2000)
     }
     setIsSaving(false)
   }
@@ -789,6 +865,19 @@ export default function ResumeEditPage() {
         <CardContent>
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8 divide-y divide-neutral-200 dark:divide-neutral-700 text-left">
+
+              {/* === 버전 정보 === */}
+              <section className="space-y-3">
+                <h3 className="text-base font-semibold">버전 정보</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormField control={form.control} name="_versionName" render={({ field }) => (
+                    <FormItem><FormLabel>버전 이름</FormLabel><FormControl><Input placeholder="예: 토스 지원용" {...field} /></FormControl></FormItem>
+                  )} />
+                  <FormField control={form.control} name="_versionMemo" render={({ field }) => (
+                    <FormItem><FormLabel>메모</FormLabel><FormControl><Input placeholder="간단한 메모 (선택)" {...field} /></FormControl></FormItem>
+                  )} />
+                </div>
+              </section>
 
               {/* === Profile === */}
               <section className="space-y-3">
@@ -821,8 +910,17 @@ export default function ResumeEditPage() {
               {/* === Summary + Keywords === */}
               <section className="space-y-3 pt-2">
                 <SectionTitleInput name="sectionTitles.summary" />
+                <FormField control={form.control} name="summaryHeadline" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-neutral-500">헤드라인 (대형 타이틀)</FormLabel>
+                    <FormControl><Input placeholder="더 나은 삶을 위한 고민" {...field} /></FormControl>
+                  </FormItem>
+                )} />
                 <FormField control={form.control} name="summary" render={({ field }) => (
-                  <FormItem><FormControl><Textarea placeholder="자기소개를 작성하세요" rows={4} {...field} /></FormControl></FormItem>
+                  <FormItem>
+                    <FormLabel className="text-xs text-neutral-500">본문</FormLabel>
+                    <FormControl><Textarea placeholder="자기소개를 작성하세요" rows={4} {...field} /></FormControl>
+                  </FormItem>
                 )} />
                 <KeywordsInput />
               </section>
@@ -834,14 +932,17 @@ export default function ResumeEditPage() {
               <CertificationsSection />
               <CustomSectionsEditor />
 
+              {/* === Cover Letter === */}
+              <CoverLetterSection />
+
               {/* === Actions === */}
               <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-neutral-200 dark:border-neutral-700 -mx-6 px-6 py-4 flex items-center justify-between mt-4">
                 <Button type="button" className="cursor-pointer" variant="secondary" onClick={() => router.back()}>
                   <MoveLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button type="submit" className="cursor-pointer" disabled={isSaving}>
+                <Button type="submit" className={`cursor-pointer ${isSaved ? 'bg-green-600 hover:bg-green-600 text-white' : ''}`} disabled={isSaving || isSaved}>
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  {isSaving ? '저장 중...' : '저장'}
+                  {isSaving ? '저장 중...' : isSaved ? '저장됨' : '저장'}
                 </Button>
               </div>
             </form>
