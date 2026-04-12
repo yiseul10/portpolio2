@@ -15,13 +15,14 @@ function loadProfileMarkdown(): string {
 async function fetchResumeData(): Promise<string> {
   try {
     const { data, error } = await supabase
-      .from('resume')
-      .select('data')
+      .from('resume_versions')
+      .select('resume_data')
+      .eq('is_active', true)
       .single()
 
     if (error || !data) return '이력서 정보를 불러올 수 없습니다.'
 
-    const resume = data.data
+    const resume = data.resume_data
     const parts: string[] = []
 
     if (resume.profile) {
