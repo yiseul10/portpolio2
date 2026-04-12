@@ -555,4 +555,25 @@ pre {
   .resume-content .text-neutral-600 {
     color: #555 !important;
   }
+
+  /* 커버레터 인쇄 스타일 */
+  .cover-letter-content {
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+
+  .cover-letter-content * {
+    color: black !important;
+    border-color: #ddd !important;
+  }
+
+  .cover-letter-content .text-neutral-500,
+  .cover-letter-content .text-neutral-600 {
+    color: #555 !important;
+  }
+
+  .cover-letter-content a {
+    color: black !important;
+    text-decoration: none !important;
+  }
 }
