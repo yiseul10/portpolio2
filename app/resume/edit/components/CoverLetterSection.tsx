@@ -1,66 +1,143 @@
 'use client'
 
 import { useFormContext } from 'react-hook-form'
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { CoverLetterEditor } from './CoverLetterEditor'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { useMemo } from 'react'
 
-// 폼 내부에서 cover_letter 필드를 다루는 섹션
+function SortableSection({
+  id,
+  index,
+  section,
+  onUpdate,
+  onRemove,
+}: {
+  id: string
+  index: number
+  section: { title: string; content: string }
+  onUpdate: (field: 'title' | 'content', value: string) => void
+  onRemove: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 space-y-2 bg-background"
+    >
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="cursor-grab active:cursor-grabbing text-neutral-400 hover:text-neutral-600 shrink-0"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <Input
+          className="flex-1 text-sm font-semibold border-none p-0 h-auto focus-visible:ring-0"
+          placeholder="섹션 제목"
+          value={section.title}
+          onChange={(e) => onUpdate('title', e.target.value)}
+        />
+        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      </div>
+      <CoverLetterEditor
+        value={section.content}
+        onChange={(html) => onUpdate('content', html)}
+        placeholder="내용을 작성하세요"
+      />
+    </div>
+  )
+}
+
 export function CoverLetterSection() {
-  const { control } = useFormContext()
+  const { setValue, watch } = useFormContext()
+  const sections: { title: string; content: string }[] = watch('cover_letter.sections') || []
 
-  const sections = [
-    { name: 'cover_letter.greeting', label: '인사말', titleName: 'cover_letter.sectionTitles.greeting', placeholder: '안녕하세요, ...로 시작하는 인사말을 작성하세요', rows: 3 },
-    { name: 'cover_letter.motivation', label: '지원동기', titleName: 'cover_letter.sectionTitles.motivation', placeholder: '이 회사/포지션에 지원하게 된 동기를 작성하세요', rows: 5 },
-    { name: 'cover_letter.experience', label: '관련 경험', titleName: 'cover_letter.sectionTitles.experience', placeholder: '이 포지션과 관련된 핵심 경험을 작성하세요', rows: 6 },
-    { name: 'cover_letter.strengths', label: '강점', titleName: 'cover_letter.sectionTitles.strengths', placeholder: '차별화되는 강점이나 가치를 작성하세요', rows: 4 },
-    { name: 'cover_letter.closing', label: '마무리', titleName: 'cover_letter.sectionTitles.closing', placeholder: '감사 인사 및 마무리를 작성하세요', rows: 3 },
-  ]
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  // DnD는 안정적인 id가 필요하므로 index 기반 id 사용
+  const ids = useMemo(() => sections.map((_, i) => `cl-section-${i}`), [sections.length])
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = ids.indexOf(active.id as string)
+    const newIndex = ids.indexOf(over.id as string)
+    setValue('cover_letter.sections', arrayMove(sections, oldIndex, newIndex))
+  }
+
+  const addSection = () => {
+    setValue('cover_letter.sections', [...sections, { title: '', content: '' }])
+  }
+
+  const removeSection = (i: number) => {
+    setValue('cover_letter.sections', sections.filter((_, idx) => idx !== i))
+  }
+
+  const updateSection = (i: number, field: 'title' | 'content', value: string) => {
+    const updated = [...sections]
+    updated[i] = { ...updated[i], [field]: value }
+    setValue('cover_letter.sections', updated)
+  }
 
   return (
     <section className="space-y-4 pt-2">
       <h3 className="text-base font-semibold">Cover Letter</h3>
 
-      {/* 지원 대상 정보 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField control={control} name="cover_letter.targetCompany" render={({ field }) => (
-          <FormItem>
-            <FormLabel>지원 회사</FormLabel>
-            <FormControl><Input placeholder="지원하는 회사명" {...field} /></FormControl>
-          </FormItem>
-        )} />
-        <FormField control={control} name="cover_letter.targetPosition" render={({ field }) => (
-          <FormItem>
-            <FormLabel>지원 포지션</FormLabel>
-            <FormControl><Input placeholder="Frontend Developer" {...field} /></FormControl>
-          </FormItem>
-        )} />
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          <div className="space-y-3">
+            {sections.map((section, i) => (
+              <SortableSection
+                key={ids[i]}
+                id={ids[i]}
+                index={i}
+                section={section}
+                onUpdate={(field, value) => updateSection(i, field, value)}
+                onRemove={() => removeSection(i)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
-      {/* 섹션별 편집 */}
-      {sections.map(({ name, label, titleName, placeholder, rows }) => (
-        <div key={name} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 space-y-2">
-          <FormField control={control} name={titleName} render={({ field }) => (
-            <Input
-              className="text-sm font-semibold border-none p-0 h-auto focus-visible:ring-0 w-auto max-w-[200px]"
-              placeholder={label}
-              {...field}
-            />
-          )} />
-          <FormField control={control} name={name} render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea placeholder={placeholder} rows={rows} {...field} />
-              </FormControl>
-            </FormItem>
-          )} />
-        </div>
-      ))}
+      <Button type="button" variant="outline" size="sm" onClick={addSection}>
+        <Plus className="h-4 w-4 mr-1" /> 섹션 추가
+      </Button>
     </section>
   )
 }

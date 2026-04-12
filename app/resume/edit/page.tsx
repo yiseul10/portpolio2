@@ -563,7 +563,7 @@ function SectionTitleInput({ name }: { name: string }) {
       name={name as any}
       render={({ field }) => (
         <Input
-          className="text-base font-semibold border-none p-0 h-auto focus-visible:ring-0 w-auto max-w-[200px]"
+          className="text-base font-semibold border-none p-0 h-auto focus-visible:ring-0 w-full"
           {...field}
         />
       )}
@@ -684,11 +684,32 @@ export default function ResumeEditPage() {
   )
 }
 
+// 구버전 cover_letter 포맷(named fields) → 새 sections 배열로 마이그레이션
+function migrateCoverLetter(raw: any) {
+  if (!raw) return null
+  // 이미 새 포맷이면 그대로
+  if (Array.isArray(raw.sections)) {
+    return { sections: raw.sections.map((s: any) => ({ title: s.title || '', content: s.content || '' })) }
+  }
+  // 구버전: named fields → sections 배열로 변환
+  const titles = raw.sectionTitles || {}
+  const sections = [
+    { title: titles.greeting || '인사말', content: raw.greeting || '' },
+    { title: titles.motivation || '지원동기', content: raw.motivation || '' },
+    { title: titles.experience || '관련 경험', content: raw.experience || '' },
+    { title: titles.strengths || '강점', content: raw.strengths || '' },
+    { title: titles.closing || '마무리', content: raw.closing || '' },
+    ...(raw.customSections || []).map((s: any) => ({ title: s.title || '', content: s.content || '' })),
+  ]
+  return { sections }
+}
+
 function ResumeEditContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [resumeId, setResumeId] = useState<string | null>(null)
 
@@ -763,7 +784,7 @@ function ResumeEditContent() {
               subtitle: item.subtitle || '',
             })),
           })),
-          cover_letter: version.cover_letter || null,
+          cover_letter: migrateCoverLetter(version.cover_letter),
           _versionName: version.name || '',
           _versionMemo: version.memo || '',
         }
@@ -808,8 +829,13 @@ function ResumeEditContent() {
     if (result.error) {
       toast.error('저장 실패: ' + result.error.message)
     } else {
+      setIsSaved(true)
       toast.success('저장되었습니다.')
-      setTimeout(() => { router.push('/resume'); router.refresh() }, 1000)
+      setTimeout(() => {
+        setIsSaved(false)
+        router.push('/resume')
+        router.refresh()
+      }, 2000)
     }
     setIsSaving(false)
   }
@@ -884,8 +910,17 @@ function ResumeEditContent() {
               {/* === Summary + Keywords === */}
               <section className="space-y-3 pt-2">
                 <SectionTitleInput name="sectionTitles.summary" />
+                <FormField control={form.control} name="summaryHeadline" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-neutral-500">헤드라인 (대형 타이틀)</FormLabel>
+                    <FormControl><Input placeholder="더 나은 삶을 위한 고민" {...field} /></FormControl>
+                  </FormItem>
+                )} />
                 <FormField control={form.control} name="summary" render={({ field }) => (
-                  <FormItem><FormControl><Textarea placeholder="자기소개를 작성하세요" rows={4} {...field} /></FormControl></FormItem>
+                  <FormItem>
+                    <FormLabel className="text-xs text-neutral-500">본문</FormLabel>
+                    <FormControl><Textarea placeholder="자기소개를 작성하세요" rows={4} {...field} /></FormControl>
+                  </FormItem>
                 )} />
                 <KeywordsInput />
               </section>
@@ -905,9 +940,9 @@ function ResumeEditContent() {
                 <Button type="button" className="cursor-pointer" variant="secondary" onClick={() => router.back()}>
                   <MoveLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button type="submit" className="cursor-pointer" disabled={isSaving}>
+                <Button type="submit" className={`cursor-pointer ${isSaved ? 'bg-green-600 hover:bg-green-600 text-white' : ''}`} disabled={isSaving || isSaved}>
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  {isSaving ? '저장 중...' : '저장'}
+                  {isSaving ? '저장 중...' : isSaved ? '저장됨' : '저장'}
                 </Button>
               </div>
             </form>
