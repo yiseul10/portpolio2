@@ -52,6 +52,7 @@ const HIGHLIGHT_COLORS = [
 
 const TEXT_COLORS = [
   { label: '기본', color: '' },
+  { label: '검정', color: '#111111' },
   { label: '빨강', color: '#ef4444' },
   { label: '주황', color: '#f97316' },
   { label: '초록', color: '#22c55e' },
@@ -200,19 +201,25 @@ function ColorPicker({
         </Button>
       }
     >
-      <div className="p-2">
-        <div className="text-[10px] text-muted-foreground mb-1.5 px-1">{tooltip}</div>
-        <div className="grid grid-cols-4 gap-1">
-          {colors.map((c) => (
-            <button key={c.color || 'none'} type="button" title={c.label}
-              className="w-7 h-7 rounded-md border border-border hover:scale-110 transition-transform flex items-center justify-center"
-              style={{ backgroundColor: c.color || 'transparent' }}
+      <div className="py-1.5 px-1 min-w-[140px]">
+        <div className="text-[10px] text-muted-foreground mb-1 px-2">{tooltip}</div>
+        {colors.map((c) => {
+          const isActive = c.color ? activeColor === c.color : !activeColor
+          return (
+            <button key={c.color || 'none'} type="button"
+              className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-accent transition-colors text-sm ${isActive ? 'bg-accent font-semibold' : ''}`}
               onClick={() => onSelect(c.color)}
             >
-              {!c.color && <span className="text-[10px] text-muted-foreground">✕</span>}
+              <span
+                className="w-4 h-4 rounded-sm border border-border shrink-0 flex items-center justify-center"
+                style={{ backgroundColor: c.color || 'transparent' }}
+              >
+                {!c.color && <span className="text-[9px] text-muted-foreground leading-none">✕</span>}
+              </span>
+              <span>{c.label}</span>
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
     </Dropdown>
   )
