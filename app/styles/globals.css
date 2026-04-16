@@ -529,7 +529,12 @@ pre {
 
   /* 전체 레이아웃 리셋
      13px 베이스: text-base=13px(9.75pt), text-sm=11.4px(8.5pt), text-xs=9.75px(7.3pt) */
-  html, body {
+  html {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
     color: black !important;
     font-size: 13px !important;
@@ -538,12 +543,18 @@ pre {
   }
 
   body {
-    max-width: 100% !important;
+    width: 186mm !important;
+    max-width: 186mm !important;
+    overflow-x: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: white !important;
+    color: black !important;
   }
 
   main {
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -553,9 +564,18 @@ pre {
     display: none !important;
   }
 
+  /* 이력서 페이지 컨테이너 */
+  .resume-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
   /* 이력서 콘텐츠 인쇄 최적화 */
   .resume-content {
+    width: 100% !important;
     max-width: 100% !important;
+    overflow: visible !important;
     page-break-after: always; /* 커버레터를 무조건 다음 페이지로 */
   }
 
@@ -592,6 +612,8 @@ pre {
     content: " (" attr(href) ")";
     font-size: 10px;
     color: #666;
+    word-break: break-all;
+    overflow-wrap: break-word;
   }
 
   /* 다크모드 색상 무시 */
@@ -605,10 +627,18 @@ pre {
     color: #555 !important;
   }
 
-  /* 커버레터 인쇄 스타일: 이력서와 동일한 13px 베이스, leading-relaxed(1.625) */
+  /* 커버레터 인쇄 스타일: 이력서 본문(text-sm ≈ 11.4px)과 크기 맞춤 */
   .cover-letter-content {
-    line-height: 1.625; /* leading-relaxed = 이력서와 동일 */
+    font-size: 11.5px !important;
+    line-height: 1.625;
     color: #111;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .cl-content {
+    font-size: 11.5px !important;
   }
 
   .cover-letter-content * {

@@ -61,16 +61,34 @@ async function fetchResumeData(): Promise<string> {
   }
 }
 
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[\s\S]*?```/g, '') // 코드 블록 제거
+    .replace(/`[^`]*`/g, '')         // 인라인 코드 제거
+    .replace(/!\[.*?\]\(.*?\)/g, '') // 이미지 제거
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // 링크 → 텍스트만
+    .replace(/^#{1,6}\s+/gm, '')     // 헤딩 기호
+    .replace(/[*_~]{1,3}([^*_~]+)[*_~]{1,3}/g, '$1') // bold/italic
+    .replace(/^\s*[-*+]\s+/gm, '')   // 리스트 기호
+    .replace(/^\s*\d+\.\s+/gm, '')   // 번호 리스트
+    .replace(/\n{3,}/g, '\n\n')      // 과도한 빈줄 정리
+    .trim()
+}
+
 async function fetchBlogSummary(): Promise<string> {
   try {
     const posts = await getBlogPosts()
     if (!posts.length) return '블로그 글이 없습니다.'
 
     const summaries = posts.slice(0, 10).map((post) => {
-      return `- "${post.title}" (${post.category || '미분류'}) - ${post.summary || '요약 없음'}`
+      const description = post.description ? `설명: ${post.description}` : ''
+      const content = post.mdx_content
+        ? `내용 요약: ${stripMarkdown(post.mdx_content).slice(0, 300)}`
+        : ''
+      return `### "${post.title}" (${post.category || '미분류'})\n${description}\n${content}`
     })
 
-    return '블로그 글 목록:\n' + summaries.join('\n')
+    return '블로그 글 목록:\n' + summaries.join('\n\n')
   } catch {
     return '블로그 정보를 불러올 수 없습니다.'
   }
