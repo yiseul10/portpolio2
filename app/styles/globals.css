@@ -415,6 +415,12 @@ pre {
   margin-bottom: 0;
 }
 
+/* 빈 단락(Enter 두 번) 높이 보존 — 의도적으로 띄운 줄이 사라지지 않도록 */
+.cl-editor .tiptap p:empty::before,
+.cl-content p:empty::before {
+  content: '\00a0';
+}
+
 /* === Tiptap Editor Styles === */
 .tiptap {
   outline: none;
@@ -430,8 +436,9 @@ pre {
   height: 0;
 }
 
-/* Table */
-.tiptap table {
+/* Table — 에디터(.tiptap)와 렌더러(.cl-content) 동일 스타일 */
+.tiptap table,
+.cl-content table {
   border-collapse: collapse;
   table-layout: auto;
   width: 100%;
@@ -439,21 +446,27 @@ pre {
 }
 
 .tiptap th,
-.tiptap td {
+.tiptap td,
+.cl-content th,
+.cl-content td {
   border: 1px solid var(--border);
   padding: 0.5rem 1rem;
   text-align: left;
   min-width: 80px;
+  vertical-align: top;
   position: relative;
 }
 
-.tiptap th {
+.tiptap th,
+.cl-content th {
   background-color: var(--muted);
   font-weight: 600;
 }
 
 .tiptap th p,
-.tiptap td p {
+.tiptap td p,
+.cl-content th p,
+.cl-content td p {
   margin: 0;
 }
 

@@ -5,7 +5,11 @@ import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
-import { Bold, Italic, RemoveFormatting } from 'lucide-react'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { Bold, Italic, RemoveFormatting, Table as TableIcon, Plus, Minus, Trash2 } from 'lucide-react'
 import { useEffect } from 'react'
 
 interface CoverLetterEditorProps {
@@ -37,6 +41,10 @@ export function CoverLetterEditor({ value, onChange, placeholder }: CoverLetterE
       }),
       TextStyle,
       Color,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Placeholder.configure({
         placeholder: placeholder || '내용을 작성하세요',
       }),
@@ -125,6 +133,44 @@ export function CoverLetterEditor({ value, onChange, placeholder }: CoverLetterE
             </button>
           ))}
         </div>
+
+        <div className="w-px h-4 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+
+        {/* 표 */}
+        <button type="button" className={btn(editor.isActive('table'))}
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          title="표 삽입 (3×3)">
+          <TableIcon className="h-3.5 w-3.5" />
+        </button>
+        {editor.isActive('table') && (
+          <>
+            <button type="button" className={btn(false)}
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              title="행 추가">
+              <span className="text-[10px] font-bold leading-none flex items-center gap-0.5"><Plus className="h-3 w-3" />행</span>
+            </button>
+            <button type="button" className={btn(false)}
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              title="열 추가">
+              <span className="text-[10px] font-bold leading-none flex items-center gap-0.5"><Plus className="h-3 w-3" />열</span>
+            </button>
+            <button type="button" className={btn(false)}
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              title="행 삭제">
+              <span className="text-[10px] font-bold leading-none flex items-center gap-0.5"><Minus className="h-3 w-3" />행</span>
+            </button>
+            <button type="button" className={btn(false)}
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              title="열 삭제">
+              <span className="text-[10px] font-bold leading-none flex items-center gap-0.5"><Minus className="h-3 w-3" />열</span>
+            </button>
+            <button type="button" className={btn(false)}
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              title="표 삭제">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </>
+        )}
 
         <div className="w-px h-4 bg-neutral-300 dark:bg-neutral-600 mx-1" />
 
