@@ -738,8 +738,10 @@ function ResumeEditContent() {
       if (!session) { setSession(null); setIsLoading(false); router.push('/login'); return }
       setSession(session)
 
-      // resume_versions에서 로드 (쿼리 파라미터 v=<id> 또는 활성 버전)
+      // resume_versions에서 로드 (쿼리 파라미터 v=<id>, new=1, 또는 활성 버전)
+      // new=1: 활성 버전 데이터를 prefill하되 resumeId는 null로 유지 → 저장 시 createVersion
       const versionId = searchParams.get('v')
+      const isNew = searchParams.get('new') === '1'
       let versionQuery = supabase.from('resume_versions').select('*')
       if (versionId) {
         versionQuery = versionQuery.eq('id', versionId)
@@ -751,7 +753,7 @@ function ResumeEditContent() {
       if (error) console.error('Version fetch error:', error)
 
       if (version) {
-        setResumeId(version.id)
+        if (!isNew) setResumeId(version.id)
         const raw = version.resume_data || {}
         const migratedExperience = (raw.experience || []).map((exp: any) => ({
           ...exp,
@@ -785,8 +787,8 @@ function ResumeEditContent() {
             })),
           })),
           cover_letter: migrateCoverLetter(version.cover_letter),
-          _versionName: version.name || '',
-          _versionMemo: version.memo || '',
+          _versionName: isNew ? '' : (version.name || ''),
+          _versionMemo: isNew ? '' : (version.memo || ''),
         }
         form.reset(merged)
       }

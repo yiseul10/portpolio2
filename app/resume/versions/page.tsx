@@ -29,7 +29,7 @@ export default async function VersionsPage() {
           </Link>
           <h1 className="text-xl font-bold">Resume Versions</h1>
         </div>
-        <Link href="/resume/edit">
+        <Link href="/resume/edit?new=1">
           <Button variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-1" /> 새 버전
           </Button>
