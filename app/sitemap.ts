@@ -1,6 +1,7 @@
 import { getBlogPages } from '@/app/blog/utils/mdx.server'
+import { siteUrl } from '@lib/site'
 
-export const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+export const baseUrl = siteUrl
 
 export default async function sitemap() {
   let blogs = getBlogPages().map((post) => ({

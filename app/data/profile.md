@@ -34,7 +34,7 @@
 
 ## 연락처
 - 이메일: yiseul10@gmail.com
-- 포트폴리오: https://portpolio2yiseul.vercel.app
+- 포트폴리오: https://yiseul-portfolio.vercel.app/
 
 ## 취미
 - 평소에는 요가를 주로 해요
@@ -78,5 +78,4 @@
 
 ## 협업
 - 의견 충돌이 생기면 이유를 먼저 물어봐요.
-
 

@@ -9,6 +9,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import Footer from './components/footer'
 import { Toaster } from "sonner";
 import { ChatBot } from './components/chatbot/ChatBot'
+import { siteUrl } from '@lib/site'
 
 const newsreader = Newsreader({
   subsets: ['latin'],
@@ -25,10 +26,10 @@ const manrope = Manrope({
   display: 'swap',
 })
 
- const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const baseUrl = siteUrl
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(baseUrl),
   title: {
     default: 'My blog',
     template: '%s | blog',
