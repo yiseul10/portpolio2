@@ -415,6 +415,46 @@ pre {
   margin-bottom: 0;
 }
 
+.cl-editor .tiptap ul,
+.cl-content ul {
+  list-style: disc;
+}
+
+.cl-editor .tiptap ol,
+.cl-content ol {
+  list-style: decimal;
+}
+
+.cl-editor .tiptap ul,
+.cl-editor .tiptap ol,
+.cl-content ul,
+.cl-content ol {
+  margin: 0 0 0.65em;
+  padding-left: 1.25rem;
+}
+
+.cl-editor .tiptap ul ul,
+.cl-content ul ul {
+  list-style: circle;
+  margin-bottom: 0;
+}
+
+.cl-editor .tiptap ul ul ul,
+.cl-content ul ul ul {
+  list-style: square;
+}
+
+.cl-editor .tiptap li,
+.cl-content li {
+  margin: 0.15em 0;
+  padding-left: 0.15rem;
+}
+
+.cl-editor .tiptap li p,
+.cl-content li p {
+  margin: 0.1em 0;
+}
+
 /* 빈 단락(Enter 두 번) 높이 보존 — 의도적으로 띄운 줄이 사라지지 않도록 */
 .cl-editor .tiptap p:empty::before,
 .cl-content p:empty::before {

@@ -9,7 +9,17 @@ import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
-import { Bold, Italic, RemoveFormatting, Table as TableIcon, Plus, Minus, Trash2 } from 'lucide-react'
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  RemoveFormatting,
+  Table as TableIcon,
+  Plus,
+  Minus,
+  Trash2,
+} from 'lucide-react'
 import { useEffect } from 'react'
 
 interface CoverLetterEditorProps {
@@ -104,6 +114,20 @@ export function CoverLetterEditor({ value, onChange, placeholder }: CoverLetterE
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           title="중간 제목">
           <span className="text-xs font-bold leading-none">H3</span>
+        </button>
+
+        <div className="w-px h-4 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+
+        {/* 목록 */}
+        <button type="button" className={btn(editor.isActive('bulletList'))}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          title="글머리 목록">
+          <List className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" className={btn(editor.isActive('orderedList'))}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          title="번호 목록">
+          <ListOrdered className="h-3.5 w-3.5" />
         </button>
 
         <div className="w-px h-4 bg-neutral-300 dark:bg-neutral-600 mx-1" />
