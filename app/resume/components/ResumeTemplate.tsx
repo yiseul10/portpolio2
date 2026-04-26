@@ -1,8 +1,4 @@
 import { Mail, Phone, Linkedin, Globe, FileText } from 'lucide-react'
-import { InlineMarkdown, BlockMarkdown } from './Markdown'
-
-const SECTION_LABEL =
-  'resume-section-label text-sm font-bold tracking-wider uppercase text-neutral-900 border-b border-neutral-400 pb-1.5 mb-4'
 
 export function ResumeTemplate({ data, authenticated = false }: { data: any; authenticated?: boolean }) {
   const profile = data?.profile || {}
@@ -41,59 +37,59 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
     <div className="resume-content">
       {/* 헤더 */}
       {hasProfile && (
-        <header className="mb-7 print:mb-6 border-b-2 border-neutral-900 pb-3">
-          <div className="flex justify-between items-start gap-6">
-            <div className="flex-1 min-w-0">
+        <header className="mb-6 print:mb-6 border-b-2 border-neutral-700 pb-1">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
               {profile.name && (
-                <h1 className="text-3xl font-bold tracking-tight text-neutral-900 print:text-[24px]">
+                <h1 className="text-3xl font-bold tracking-tight print:text-2xl">
                   {profile.name}
                 </h1>
               )}
               {profile.title && (
-                <p className="text-base font-semibold tracking-wide uppercase text-neutral-600 mt-1 print:text-[13px]">
+                <p className="text-lg font-semibold text-neutral-500  mt-0.5 print:text-base">
                   {profile.title}
                 </p>
               )}
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-sm font-medium text-neutral-700">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm font-medium text-neutral-800 ">
                 {profile.email && (
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
                     <Mail className="w-3.5 h-3.5" />
                     <span className="hidden print:inline">{profile.email}</span>
-                    <a href={`mailto:${profile.email}`} className="print:hidden underline-offset-2 hover:underline">
+                    <a href={`mailto:${profile.email}`} className="print:hidden underline hover:text-neutral-800 dark:hover:text-neutral-200">
                       이메일
                     </a>
                   </span>
                 )}
                 {authenticated && profile.phone && (
-                  <span className="inline-flex items-center gap-1.5 tabular-nums">
-                    <Phone className="w-3.5 h-3.5" />
-                    {profile.phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1·$2·$3')}
+                  <span className="inline-flex items-center gap-1">
+                    <Phone className="w-3.5 h-3.5" /> {profile.phone.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{4})(\d{4})/, '$1\u00B7$2\u00B7$3')}
                   </span>
                 )}
                 {profile.linkedin && (
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
                     <Linkedin className="w-3.5 h-3.5" />
-                    <a href={profile.linkedin} className="underline-offset-2 hover:underline">
+                    <a href={profile.linkedin} className=" hover:text-neutral-800 dark:hover:text-neutral-200">
                       LinkedIn
                     </a>
                   </span>
                 )}
                 {profile.website && (
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
                     <Globe className="w-3.5 h-3.5" />
-                    <a href={profile.website} className="underline-offset-2 hover:underline">
+                    <a href={profile.website} className="underline hover:text-neutral-800 dark:hover:text-neutral-200">
                       포트폴리오
                     </a>
                   </span>
                 )}
               </div>
             </div>
+            {/* 증명사진 - 로그인 시에만 */}
             {authenticated && profile.photo && (
-              <div className="shrink-0">
+              <div className="shrink-0 ml-6">
                 <img
                   src={profile.photo}
                   alt="Profile"
-                  className="w-28 h-28 object-cover rounded-lg print:w-24 print:h-24"
+                  className="w-28 h-28 object-cover rounded-lg  print:w-24 print:h-24"
                 />
               </div>
             )}
@@ -102,28 +98,27 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
       )}
 
       {/* 소개 */}
-      {(summaryHeadline || summary || keywords.length > 0) && (
-        <section className="resume-section mb-7 print:mb-6">
+      {(summaryHeadline || summary) && (
+        <section className="mb-2 print:mb-1">
           {summaryHeadline && (
-            <h2 className="text-2xl font-bold tracking-tight text-neutral-900 mb-3 print:text-[20px]">
+            <h2 className="text-2xl font-bold tracking-tight mb-2 print:text-xl">
               {summaryHeadline}
             </h2>
           )}
+          <span className="text-base leading-relaxed text-neutral-700 whitespace-pre-line">
+            {summary}
+          </span>
+          {/* 해시태그 키워드 */}
           {keywords.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="flex flex-wrap gap-2 mt-4">
               {keywords.map((kw: string, i: number) => (
                 <span
                   key={i}
-                  className="text-xs px-2.5 py-0.5 rounded-full bg-neutral-900 text-white print:bg-transparent print:text-neutral-900 print:border print:border-neutral-700"
+                  className="text-xs px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 print:border print:border-neutral-300 print:bg-transparent"
                 >
                   #{kw}
                 </span>
               ))}
-            </div>
-          )}
-          {summary && (
-            <div className="text-[15px] leading-relaxed text-neutral-800 print:text-[12px]">
-              <BlockMarkdown>{summary}</BlockMarkdown>
             </div>
           )}
         </section>
@@ -131,57 +126,55 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
 
       {/* 기술 스택 */}
       {skills.length > 0 && (
-        <section className="resume-section mb-7 print:mb-6">
-          <h2 className={SECTION_LABEL}>{titles.skills}</h2>
-          <div className="space-y-2">
-            {skills.map((group: any, i: number) => (
-              <div key={i} className="flex flex-col sm:flex-row sm:items-baseline gap-x-4 gap-y-1">
-                {group.category && (
-                  <h3 className="sm:w-32 shrink-0 text-sm font-semibold text-neutral-900 print:text-[11px]">
-                    {group.category}
-                  </h3>
-                )}
-                <div className="flex flex-wrap gap-1.5 flex-1">
-                  {(typeof group.items === 'string' ? group.items.split(',') : []).map((item: string, j: number) => (
-                    <span
-                      key={j}
-                      className="text-xs px-2 py-0.5 rounded bg-neutral-200 text-neutral-900 print:bg-neutral-100 print:border print:border-neutral-300"
-                    >
+          <section className="mb-8 print:mb-8">
+            <div className="w-full gap-5 text-sm">
+              {skills.map((group: any, i: number) => (
+                  <div key={i}>
+                    {group.category && (
+                        <h3 className="font-medium text-neutral-800  mb-2">
+                          {group.category}
+                        </h3>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {(typeof group.items === 'string' ? group.items.split(',') : []).map((item: string, j: number) => (
+                          <span
+                              key={j}
+                              className="text-xs px-2 py-0.5 rounded bg-neutral-300  text-neutral-900"
+                          >
                       {item.trim()}
                     </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                      ))}
+                    </div>
+                  </div>
+              ))}
+            </div>
+          </section>
       )}
 
       {/* 경력 */}
       {experience.length > 0 && (
-        <section className="resume-section mb-7 print:mb-6">
-          <h2 className={SECTION_LABEL}>{titles.experience}</h2>
-          <div className="space-y-6 print:space-y-5">
+        <section className="mb-8 print:mb-10">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
+            {titles.experience}
+          </h2>
+          <div className="">
             {experience.map((exp: any, i: number) => (
               <div key={i} className="experience-item">
-                <div className="flex justify-between items-baseline gap-4">
-                  <h3 className="text-base font-black text-neutral-900 print:text-[14px]">{exp.company}</h3>
-                  <span className="text-xs text-neutral-500 shrink-0 tabular-nums tracking-wide">
+                <div className="flex justify-between items-baseline">
+                  <h3 className="font-black">{exp.company}</h3>
+                  <span className="text-xs text-neutral-500 shrink-0 ml-4">
                     {exp.startDate} - {exp.endDate}
                   </span>
                 </div>
                 {exp.role && (
-                  <p className="text-[13px] font-semibold tracking-wide uppercase text-neutral-700 mt-0.5 print:text-[11px]">
-                    {exp.role}
-                  </p>
+                  <p className="text-sm text-neutral-500">{exp.role}</p>
                 )}
                 {exp.subtitle && (
-                  <p className="text-[15px] font-bold text-neutral-900 mt-3 leading-snug print:text-[12.5px]">
-                    {exp.subtitle}
-                  </p>
+                  <p className="text-sm text-neutral-500 font-semibold italic mt-2 mb-3">{exp.subtitle}</p>
                 )}
+                {!exp.subtitle && exp.role && <div className="mb-2" />}
                 {Array.isArray(exp.descriptions) && exp.descriptions.length > 0 && (
-                  <ul className="text-[13.5px] leading-relaxed text-neutral-800 mt-3 print:text-[11.5px] print:mt-2">
+                  <ul className="text-sm text-neutral-700 mt-4">
                     {exp.descriptions.map((desc: any, j: number) => {
                       const item = typeof desc === 'string'
                         ? { text: desc, level: 1, bold: false, italic: false }
@@ -189,6 +182,7 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
                       if (!item.text) return null
                       const level = item.level ?? 0
 
+                      // 3단계 × 불렛 on/off
                       const depth = Math.floor(level / 2)
                       const hasBullet = level % 2 === 1
 
@@ -196,24 +190,25 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
                       const bulletClass = depth === 0 ? 'list-disc' : depth === 1 ? 'list-[circle]' : 'list-["‣"]'
                       const textStyle = `${item.bold ? 'font-bold' : ''} ${item.italic ? 'italic' : ''}`.trim()
 
+                      // 깊이별 간격: depth-0은 그룹 타이틀로 위에 넉넉한 간격, 하위는 촘촘하게
                       const spacingClass = j === 0
                         ? ''
                         : depth === 0
-                          ? 'mt-2.5'
+                          ? 'mt-3'
                           : depth === 1
                             ? 'mt-1'
                             : 'mt-0.5'
 
                       if (!hasBullet) {
                         return (
-                          <li key={j} className={`list-none ${indentClass} ${spacingClass} ${depth === 0 ? 'font-semibold text-neutral-900' : ''} ${textStyle}`}>
-                            <InlineMarkdown>{item.text}</InlineMarkdown>
+                          <li key={j} className={`list-none ${indentClass} ${spacingClass} ${depth === 0 ? 'font-medium' : ''} ${textStyle}`}>
+                            {item.text}
                           </li>
                         )
                       }
                       return (
                         <li key={j} className={`${bulletClass} ${depth === 0 ? 'ml-5' : depth === 1 ? 'ml-10' : 'ml-14'} ${spacingClass} ${textStyle}`}>
-                          <InlineMarkdown>{item.text}</InlineMarkdown>
+                          {item.text}
                         </li>
                       )
                     })}
@@ -225,23 +220,27 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
         </section>
       )}
 
-      {/* 학력 */}
+
+
+      {/* 학력 - 로그인 시에만 */}
       {authenticated && education.length > 0 && (
-        <section className="resume-section mb-7 print:mb-6">
-          <h2 className={SECTION_LABEL}>{titles.education}</h2>
+        <section className="mb-8 print:mb-4">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
+            {titles.education}
+          </h2>
           <div className="space-y-3">
             {education.map((edu: any, i: number) => (
               <div key={i}>
-                <div className="flex justify-between items-baseline gap-4">
-                  <h3 className="text-sm font-bold text-neutral-900">{edu.school}</h3>
+                <div className="flex justify-between items-baseline">
+                  <h3 className="font-medium text-sm">{edu.school}</h3>
                   {(edu.startDate || edu.endDate) && (
-                    <span className="text-xs text-neutral-500 shrink-0 tabular-nums tracking-wide">
+                    <span className="text-xs text-neutral-500 shrink-0 ml-4">
                       {edu.startDate} - {edu.endDate}
                     </span>
                   )}
                 </div>
                 {edu.major && (
-                  <p className="text-sm text-neutral-600 mt-0.5">{edu.major}</p>
+                  <p className="text-sm text-neutral-500 ">{edu.major}</p>
                 )}
               </div>
             ))}
@@ -249,56 +248,60 @@ export function ResumeTemplate({ data, authenticated = false }: { data: any; aut
         </section>
       )}
 
-      {/* 자격증 / 기타 */}
+      {/* 자격증 / 기타 - 로그인 시에만 */}
       {authenticated && certifications.length > 0 && (
-        <section className="resume-section mb-7 print:mb-6">
-          <h2 className={SECTION_LABEL}>{titles.certifications}</h2>
-          <div className="space-y-2">
+        <section className="mb-8 print:mb-4">
+          <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
+            {titles.certifications}
+          </h2>
+          <div className="space-y-3">
             {certifications.map((cert: any, i: number) => (
-              <div key={i} className="flex justify-between items-baseline gap-4">
-                <h3 className="text-sm font-semibold text-neutral-900">{cert.name}</h3>
-                {(cert.startDate || cert.endDate) && (
-                  <span className="text-xs text-neutral-500 shrink-0 tabular-nums tracking-wide">
-                    {cert.startDate}{cert.startDate && cert.endDate && ' - '}{cert.endDate}
-                  </span>
-                )}
+              <div key={i}>
+                <div className="flex justify-between items-baseline">
+                  <h3 className="font-medium text-sm ">{cert.name}</h3>
+                  {(cert.startDate || cert.endDate) && (
+                    <span className="text-xs text-neutral-500 shrink-0 ml-4 print:text-sm">
+                      {cert.startDate}{cert.startDate && cert.endDate && ' - '}{cert.endDate}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* 커스텀 섹션 */}
+      {/* 커스텀 섹션들 - 로그인 시에만 */}
       {authenticated && customSections.map((section: any, i: number) => {
         const items = Array.isArray(section.items) ? section.items : []
         const layout = section.layout || 'simple'
         if (!section.title && items.length === 0) return null
         return (
-          <section key={i} className="resume-section mb-7 print:mb-6">
-            <h2 className={SECTION_LABEL}>
+          <section key={i} className="mb-8">
+            <h2 className="text-xs tracking-widest uppercase font-semibold text-neutral-400 border-b border-neutral-200 dark:border-neutral-700 pb-1 mb-3 print:mb-2">
               {section.title || '(제목 없음)'}
             </h2>
             <div className="space-y-3">
               {items.map((item: any, j: number) =>
                 layout === 'detailed' ? (
                   <div key={j}>
-                    <div className="flex justify-between items-baseline gap-4">
-                      <h3 className="text-sm font-bold text-neutral-900">{item.text}</h3>
+                    <div className="flex justify-between items-baseline">
+                      <h3 className="font-medium text-sm">{item.text}</h3>
                       {(item.startDate || item.endDate) && (
-                        <span className="text-xs text-neutral-500 shrink-0 tabular-nums tracking-wide">
+                        <span className="text-xs text-neutral-500 shrink-0 ml-4 ">
                           {item.startDate}{item.startDate && item.endDate && ' - '}{item.endDate}
                         </span>
                       )}
                     </div>
                     {item.subtitle && (
-                      <p className="text-sm text-neutral-600 mt-0.5">{item.subtitle}</p>
+                      <p className="text-sm text-neutral-500 ">{item.subtitle}</p>
                     )}
                   </div>
                 ) : (
-                  <div key={j} className="flex justify-between items-baseline gap-4 text-sm text-neutral-800">
+                  <div key={j} className="flex justify-between items-baseline text-sm text-neutral-700 dark:text-neutral-300">
                     <span>{item.text}</span>
                     {(item.startDate || item.endDate) && (
-                      <span className="text-xs text-neutral-500 shrink-0 tabular-nums tracking-wide">
+                      <span className="text-xs text-neutral-500 shrink-0 ml-4">
                         {item.startDate}{item.startDate && item.endDate && ' - '}{item.endDate}
                       </span>
                     )}
