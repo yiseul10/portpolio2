@@ -40,7 +40,7 @@ export default async function ResumePage() {
     <section className="resume-page">
       {/* 액션 버튼: 항상 렌더, AuthButton이 클라이언트에서 인증 체크 */}
       <div className="print:hidden flex justify-end mb-6 gap-2">
-        <ResumeActions versionId={version?.id} versionName={version?.name} />
+        <ResumeActions versionId={version?.id} versionName={version?.name} profileName={resumeData.profile.name} />
       </div>
 
       <ResumeTemplate data={resumeData} authenticated={!!session} />

@@ -675,6 +675,13 @@ pre {
     border-color: #ddd !important;
   }
 
+  .resume-content h2.text-xs {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+    color: #a3a3a3 !important;
+    border-color: #e5e5e5 !important;
+  }
+
   .resume-content .text-neutral-500,
   .resume-content .text-neutral-600 {
     color: #555 !important;

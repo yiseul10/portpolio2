@@ -8,24 +8,52 @@ import { useRouter } from 'next/navigation'
 interface ResumeActionsProps {
   versionId?: string
   versionName?: string
+  profileName?: string
 }
 
-export function ResumeActions({ versionId, versionName }: ResumeActionsProps) {
+const sanitizePrintTitle = (value: string) =>
+  value.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '').trim()
+
+export function ResumeActions({ versionId, versionName, profileName }: ResumeActionsProps) {
   const router = useRouter()
   const [includeCoverLetter, setIncludeCoverLetter] = useState(true)
 
   const handlePrint = () => {
     const cl = document.getElementById('cover-letter-section')
     const resumeContent = document.querySelector('.resume-content') as HTMLElement | null
+    const originalTitle = document.title
+    const name = sanitizePrintTitle(profileName || '김이슬') || '김이슬'
+    const printTitle = includeCoverLetter
+      ? `${name}_이력서_경력기술서`
+      : `${name}_이력서`
+
+    let restored = false
+    const restorePrintState = () => {
+      if (restored) return
+      restored = true
+      document.title = originalTitle
+      if (cl && resumeContent) {
+        cl.style.display = ''
+        resumeContent.style.pageBreakAfter = ''
+      }
+      window.removeEventListener('afterprint', restorePrintState)
+      window.removeEventListener('focus', restorePrintState)
+    }
+
+    document.title = printTitle
+    window.addEventListener('afterprint', restorePrintState)
+    window.addEventListener('focus', restorePrintState)
 
     if (!includeCoverLetter && cl && resumeContent) {
       cl.style.display = 'none'
       resumeContent.style.pageBreakAfter = 'auto'
+    }
+
+    try {
       window.print()
-      cl.style.display = ''
-      resumeContent.style.pageBreakAfter = ''
-    } else {
-      window.print()
+    } catch (error) {
+      restorePrintState()
+      throw error
     }
   }
 
