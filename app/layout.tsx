@@ -31,17 +31,25 @@ const baseUrl = siteUrl
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'My blog',
-    template: '%s | blog',
+    default: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    template: '%s | Kim Yiseul',
   },
-  description: 'This is my portfolio.',
+  description:
+    'Workflow automation, AI-powered internal tools, data visualization, and product ownership by Kim Yiseul.',
   openGraph: {
-    title: 'My Portfolio',
-    description: 'This is my portfolio.',
+    title: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    description:
+      'Selected work on workflow automation, AI-enabled internal tools, data visualization, and product ownership.',
     url: baseUrl,
-    siteName: 'My Portfolio',
+    siteName: 'Kim Yiseul Portfolio',
     locale: 'ko-KR',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    description:
+      'Workflow automation, AI-powered internal tools, data visualization, and product ownership.',
   },
   robots: {
     index: true,

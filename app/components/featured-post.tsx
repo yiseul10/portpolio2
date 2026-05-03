@@ -32,6 +32,14 @@ export function FeaturedPost({ keywords = [] }: { keywords?: string[] }) {
         });
     };
 
+  const heroKeywords = [
+    'Workflow Automation',
+    'AI Tooling',
+    'Data Visualization',
+    // 'Product Ownership',
+  ]
+  const visibleKeywords = heroKeywords.length > 0 ? heroKeywords : keywords
+
   return (
     <div className="w-full relative">
       <div className="absolute right-0 top-0 bottom-0 w-[40%] md:w-[30%] flex items-center justify-end pr-6">
@@ -54,18 +62,18 @@ export function FeaturedPost({ keywords = [] }: { keywords?: string[] }) {
               Kim Yiseul
             </a>
           </h2>
-            <span className={`font-serif text-base transition-colors duration-300  mt-2 ${isHovering ? 'text-neutral-800' : 'text-neutral-600'}`}>Frontend engineer · 4+ years · seoul</span>
+            <span className={`font-serif text-base transition-colors duration-300  mt-2 ${isHovering ? 'text-neutral-800' : 'text-neutral-600'}`}>AI Builder-oriented FE · 4+ years · Seoul</span>
 
           <p className={`my-1 leading-relaxed text-sm transition-colors duration-300 ${isHovering ? 'text-gray-950 dark:text-neutral-100' : 'text-gray-800 dark:text-neutral-300'}`}>
-            사용자 중심의 확장 가능한 UI를 만듭니다.
-            <br />
-            문제의 본질을 빠르게 파악하고 비즈니스 가치로 이어지는 솔루션을 지향합니다.
+              사용자 중심의 확장 가능한 UI를 만듭니다.
+              <br />
+              운영의 병목을 해결하고, 비즈니스 실행력을 높이는 솔루션을 지향합니다.
           </p>
 
             {/* keywords */}
-            {keywords.length > 0 && (
+            {visibleKeywords.length > 0 && (
               <div className="hidden sm:block flex flex-wrap gap-1.5 mt-3 ">
-                {keywords.map((kw, i) => (
+                {visibleKeywords.map((kw, i) => (
                   <span
                     key={i}
                     className={`text-xs px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 transition-colors duration-500  hover:bg-neutral-200 `}

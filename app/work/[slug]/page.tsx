@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import {formatDate} from "@/app/blog/utils/post.server";
 import {PostActions} from "@/app/blog/[slug]/components/PostActions";
 import {PostGuard} from "@/app/blog/[slug]/components/PostGuard";
+import { applyWorkCaseStudyPresentation, getWorkCaseStudy } from '@lib/work-case-studies'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,6 +24,30 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }): Promise<Metadata | undefined> {
+    const caseStudy = getWorkCaseStudy(params.slug)
+
+    if (caseStudy) {
+        const ogImage = `${baseUrl}/og?title=${encodeURIComponent(caseStudy.displayTitle)}`
+
+        return {
+            title: caseStudy.displayTitle,
+            description: caseStudy.description,
+            openGraph: {
+                title: caseStudy.displayTitle,
+                description: caseStudy.description,
+                type: 'article',
+                url: `${baseUrl}/work/${params.slug}`,
+                images: [{ url: ogImage }],
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: caseStudy.displayTitle,
+                description: caseStudy.description,
+                images: [ogImage],
+            },
+        }
+    }
+
     const { data: post } = await supabase
         .from('posts')
         .select('title, description, image, created_at, slug, published')
@@ -41,13 +66,15 @@ export async function generateMetadata({ params }): Promise<Metadata | undefined
         }
     }
 
+  const presentedPost = applyWorkCaseStudyPresentation(post)
+
   const {
     title,
     description,
     image,
     created_at: publishedTime,
     slug,
-  } = post
+  } = presentedPost
 
   const ogImage = image
     ? image
@@ -84,6 +111,9 @@ export default async function WorkPost({ params }) {
         notFound()
     }
 
+    const presentedPost = applyWorkCaseStudyPresentation(post)
+    const caseStudy = getWorkCaseStudy(post.slug)
+
   return (
     <section>
       <script
@@ -93,17 +123,17 @@ export default async function WorkPost({ params }) {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'BlogPosting',
-            headline: post.title,
+            headline: presentedPost.title,
             datePublished: post.created_at,
             dateModified: post.created_at,
-            description: post.description,
+            description: presentedPost.description,
             image: post.image
               ? `${baseUrl}${post.image}`
-              : `/og?title=${encodeURIComponent(post.title)}`,
+              : `${baseUrl}/og?title=${encodeURIComponent(presentedPost.title)}`,
             url: `${baseUrl}/work/${post.slug}`,
             author: {
               '@type': 'Person',
-              name: 'My Portfolio',
+              name: 'Kim Yiseul',
             },
           }),
         }}
@@ -123,6 +153,27 @@ export default async function WorkPost({ params }) {
                 </div>
                 <PostActions slug={post.slug} postId={post.id} />
             </div>
+            {caseStudy && (
+                <section className="mb-8 border-y border-neutral-100 dark:border-neutral-800 py-5">
+                    <div className="flex items-center gap-1 mb-4">
+                        <span className="px-2.5 py-1 rounded-sm text-xs font-medium bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900">
+                            Case
+                        </span>
+                    </div>
+                    <dl className="grid gap-4 grid-cols-1">
+                        {Object.entries(caseStudy.summary).map(([label, text]) => (
+                            <div key={label}>
+                                <dt className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                                    {label}
+                                </dt>
+                                <dd className="mt-1 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
+                                    {text}
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+                </section>
+            )}
             <article className="prose">
                 <CustomMDX source={post.mdx_content} />
             </article>

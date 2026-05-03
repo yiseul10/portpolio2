@@ -101,7 +101,7 @@ export function ChatBot() {
               <div>
                 <div className="font-semibold text-sm">이슬이에게 물어보세요</div>
                 <div className="text-[10px] text-zinc-400 mt-0.5">
-                  무엇이든 물어보세요?!
+                  프로젝트와 업무 방식에 대해 물어보세요
                 </div>
               </div>
             </div>
