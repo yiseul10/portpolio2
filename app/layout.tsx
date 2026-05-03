@@ -31,13 +31,13 @@ const baseUrl = siteUrl
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    default: 'Kim Yiseul | Frontend Engineer',
     template: '%s | Kim Yiseul',
   },
   description:
     'Workflow automation, AI-powered internal tools, data visualization, and product ownership by Kim Yiseul.',
   openGraph: {
-    title: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    title: 'Kim Yiseul | Frontend Engineer',
     description:
       'Selected work on workflow automation, AI-enabled internal tools, data visualization, and product ownership.',
     url: baseUrl,
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Kim Yiseul | AI Builder-oriented Frontend Engineer',
+    title: 'Kim Yiseul | Frontend Engineer',
     description:
       'Workflow automation, AI-powered internal tools, data visualization, and product ownership.',
   },

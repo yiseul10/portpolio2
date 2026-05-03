@@ -62,7 +62,7 @@ export function FeaturedPost({ keywords = [] }: { keywords?: string[] }) {
               Kim Yiseul
             </a>
           </h2>
-            <span className={`font-serif text-base transition-colors duration-300  mt-2 ${isHovering ? 'text-neutral-800' : 'text-neutral-600'}`}>AI Builder-oriented FE · 4+ years · Seoul</span>
+            <span className={`font-serif text-base transition-colors duration-300  mt-2 ${isHovering ? 'text-neutral-800' : 'text-neutral-600'}`}>FE · 4+ years · Seoul</span>
 
           <p className={`my-1 leading-relaxed text-sm transition-colors duration-300 ${isHovering ? 'text-gray-950 dark:text-neutral-100' : 'text-gray-800 dark:text-neutral-300'}`}>
               사용자 중심의 확장 가능한 UI를 만듭니다.
